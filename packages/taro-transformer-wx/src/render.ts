@@ -809,10 +809,16 @@ export class RenderParser {
                 }
               }
               path.node.name = t.jSXIdentifier(transformName)
-            } else if (DEFAULT_Component_SET.has(componentName)) {
+            } else if ( //ADD support to onPress transform of Touchable* component in RN
+                DEFAULT_Component_SET.has(componentName)
+               || componentName.startsWith('Touchable')
+            ) {
               let transformName = `${eventShouldBeCatched ? 'catch' : 'bind'}`
                 + name.name.slice(2).toLowerCase()
-              if (name.name === 'onClick') {
+              if (
+                name.name === 'onClick' 
+                || (name.name === 'onPress') 
+              ) {
                 transformName = eventShouldBeCatched ? 'catchtap' : 'bindtap'
               }
               path.node.name = t.jSXIdentifier(transformName)

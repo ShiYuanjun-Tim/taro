@@ -515,6 +515,18 @@ export default function transform (options: Options): TransformResult {
           if (source === TARO_PACKAGE_NAME && name === 'Component') {
             path.node.local = t.identifier('__BaseComponent')
           }
+
+          const isImportReactComponent = source === 'react' && name === 'Component';
+          if (isImportReactComponent) {
+            // 把reactCompoent组件替换成 @tarojs/taro-weapp 的
+            path.parentPath.insertAfter(
+              t.importDeclaration([
+                t.importSpecifier(t.identifier('Component'), t.identifier('Component'))
+              ], t.stringLiteral('@tarojs/taro-weapp'))
+            )
+            path.remove();
+          }
+
         }
       })
       componentSourceMap.set(source, names)
@@ -564,9 +576,11 @@ export default function transform (options: Options): TransformResult {
   result.code = generate(ast).code
   result.ast = ast
   result.compressedTemplate = result.template
-  result.template = prettyPrint(result.template, {
+
+  // the prettyPrint has bug 'add addtional space[' '] to template attrbute value' 
+  /* result.template = prettyPrint(result.template, {
     max_char: 0
-  })
+  }) */
   result.imageSrcs = Array.from(imageSource)
   return result
 }

@@ -1,7 +1,7 @@
 import traverse, { Binding, NodePath } from 'babel-traverse'
 import generate from 'babel-generator'
 import * as fs from 'fs'
-import { prettyPrint } from 'html'
+// import { prettyPrint } from 'html'
 import { transform as parse } from 'babel-core'
 import * as ts from 'typescript'
 import { Transformer } from './class'
@@ -479,6 +479,10 @@ export default function transform (options: Options): TransformResult {
       const source = path.node.source.value
       if (importSources.has(source)) {
         throw codeFrameError(path.node, '无法在同一文件重复 import 相同的包。')
+      } else if (source === 'react-native') {
+        // GAI:2
+        path.remove()
+        return
       } else {
         importSources.add(source)
       }
@@ -515,7 +519,7 @@ export default function transform (options: Options): TransformResult {
           if (source === TARO_PACKAGE_NAME && name === 'Component') {
             path.node.local = t.identifier('__BaseComponent')
           }
-
+          // GAI:1
           const isImportReactComponent = source === 'react' && name === 'Component';
           if (isImportReactComponent) {
             // 把reactCompoent组件替换成 @tarojs/taro-weapp 的
@@ -577,7 +581,7 @@ export default function transform (options: Options): TransformResult {
   result.ast = ast
   result.compressedTemplate = result.template
 
-  // the prettyPrint has bug 'add addtional space[' '] to template attrbute value' 
+  // the prettyPrint has bug 'add addtional space[' '] to template attrbute value'
   /* result.template = prettyPrint(result.template, {
     max_char: 0
   }) */

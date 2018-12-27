@@ -23,10 +23,25 @@ export function inlineStyle (obj) {
   if (obj === null || obj === undefined) {
     return ''
   }
+  // GAI:3 - combine style array
+  let allStyle = obj
+  if (Object.prototype.toString.call(obj) === '[object Array]') {
+    allStyle = obj.reduce((total, curr) => {
+      return Object.assign(total, curr)
+    }, {})
+  }
 
-  if (!isObject(obj)) {
+  if (!isObject(allStyle)) {
     throw new TypeError('style 只能是一个对象或字符串。')
   }
 
-  return Object.keys(obj).map((key) => dashify(key).concat(':').concat(obj[key])).join(';')
+  return Object.keys(allStyle).map((key) => {
+    let val = allStyle[key]
+    if (sizeableStyleKey.test(key)) {
+      val += 'px'
+    }
+    return dashify(key).concat(':').concat(val)
+  }).join(';')
 }
+
+const sizeableStyleKey = /(width)|(height)|(top)|(bottom)|(right)|(left)|(border.*width)|(border.*radius)|(fontSize)|(padding.*)|(margin.*)/i

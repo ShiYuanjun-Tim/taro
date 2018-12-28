@@ -35,8 +35,12 @@ export function inlineStyle (obj) {
     throw new TypeError('style 只能是一个对象或字符串。')
   }
 
+  if ('flexDirection' in allStyle) {
+    allStyle['display'] = 'flex'
+  }
   return Object.keys(allStyle).map((key) => {
     let val = allStyle[key]
+    // 添加单位
     if (sizeableStyleKey.test(key)) {
       val += 'px'
     }

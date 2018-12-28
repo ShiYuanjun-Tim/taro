@@ -280,6 +280,16 @@ export default function transform (options: Options): TransformResult {
       if (isContainJSXElement(path)) {
         return
       }
+      // GAI:4
+      if (callee.isMemberExpression()
+        && callee.get('object').isIdentifier({ name: 'StyleSheet' })
+        && callee.get('property').isIdentifier({ name: 'create' })
+      ) {
+        const styleObj = path.get('arguments.0')
+        path.replaceWith(styleObj)
+        return
+      }
+
       if (callee.isReferencedMemberExpression()) {
         const id = findFirstIdentifierFromMemberExpression(callee.node)
         const calleeIds = getIdsFromMemberProps(callee.node)

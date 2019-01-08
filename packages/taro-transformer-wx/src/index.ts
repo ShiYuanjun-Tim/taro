@@ -198,6 +198,14 @@ export default function transform (options: Options): TransformResult {
   let storeName!: string
   let renderMethod!: NodePath<t.ClassMethod>
   let isImportTaro = false
+
+  const replacementOfRnComp = new Map<string, string>([
+    ['TouchableWithoutFeedback', 'View'],
+    ['TouchableHighlight', 'View'],
+    ['TouchableOpacity', 'View'],
+    ['TouchableNativeFeedback', 'View']
+  ])
+
   traverse(ast, {
     TemplateLiteral (path) {
       const nodes: t.Expression[] = []
@@ -489,10 +497,6 @@ export default function transform (options: Options): TransformResult {
       const source = path.node.source.value
       if (importSources.has(source)) {
         throw codeFrameError(path.node, '无法在同一文件重复 import 相同的包。')
-      } else if (source === 'react-native') {
-        // GAI:2
-        path.remove()
-        return
       } else {
         importSources.add(source)
       }
@@ -518,6 +522,14 @@ export default function transform (options: Options): TransformResult {
           }
         })
       }
+
+      const path2remove: NodePath<any>[] = []
+      const isImportFromRN = source === 'react-native'
+      if (isImportFromRN) {
+        // GAI:2
+        path2remove.push(path)
+      }
+
       path.traverse({
         ImportDefaultSpecifier (path) {
           const name = path.node.local.name
@@ -525,24 +537,49 @@ export default function transform (options: Options): TransformResult {
         },
         ImportSpecifier (path) {
           const name = path.node.imported.name
+
           DEFAULT_Component_SET.has(name) || names.push(name)
           if (source === TARO_PACKAGE_NAME && name === 'Component') {
             path.node.local = t.identifier('__BaseComponent')
           }
           // GAI:1
-          const isImportReactComponent = source === 'react' && name === 'Component';
-          if (isImportReactComponent) {
+          const isReactComponentImported = source === 'react' && name === 'Component'
+          if (isReactComponentImported) {
             // 把reactCompoent组件替换成 @tarojs/taro-weapp 的
             path.parentPath.insertAfter(
               t.importDeclaration([
                 t.importSpecifier(t.identifier('Component'), t.identifier('Component'))
               ], t.stringLiteral('@tarojs/taro-weapp'))
             )
-            path.remove();
-          }
+            path2remove.push(path)
+          } else {
+            // GAI:6  import的rn组件中一部分需要替换掉比如Touchable.* 全部用view替换
+            const localImportName = path.node.local.name
+            const isTouchable = localImportName.startsWith('Touchable')
+            const isRNCompNeedReplace = isImportFromRN && replacementOfRnComp.has(localImportName)
+            if (isRNCompNeedReplace) {
 
+              const replacement = replacementOfRnComp.get(localImportName)
+              const importBinding = path.scope.getBinding(name)
+              importBinding && importBinding.referencePaths.forEach(refsPath => {
+                if (refsPath.isJSXIdentifier()) {
+                  refsPath.replaceWith(t.jSXIdentifier(replacement))
+                  // GAI:6  并且修改onPresss到bindtap
+                  if (isTouchable && refsPath.parentPath.isJSXOpeningElement()) {
+                    const onPressAttrPath = refsPath.parentPath
+                      .get('attributes')
+                      .find(attrPath => attrPath.get('name').isJSXIdentifier({ name: 'onPress' }))
+                    onPressAttrPath && onPressAttrPath.get('name').replaceWith(t.jSXIdentifier('bindtap'))
+                  }
+                }
+              })
+
+            }
+
+          }
         }
       })
+      path2remove.forEach(pt => pt.remove())
       componentSourceMap.set(source, names)
     }
   })

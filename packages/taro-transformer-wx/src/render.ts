@@ -809,15 +809,13 @@ export class RenderParser {
                 }
               }
               path.node.name = t.jSXIdentifier(transformName)
-            } else if ( //ADD support to onPress transform of Touchable* component in RN
-                DEFAULT_Component_SET.has(componentName)
-               || componentName.startsWith('Touchable')
-            ) {
+            } else if (DEFAULT_Component_SET.has(componentName)) {
               let transformName = `${eventShouldBeCatched ? 'catch' : 'bind'}`
                 + name.name.slice(2).toLowerCase()
               if (
-                name.name === 'onClick' 
-                || (name.name === 'onPress') 
+                name.name === 'onClick' ||
+                // 1. GAI:5  检测 Text/Button的onPress方法 ，转化成bindtap
+                (/(^Text$)|(^Button$)/i.test(componentName) && (name.name === 'onPress'))
               ) {
                 transformName = eventShouldBeCatched ? 'catchtap' : 'bindtap'
               }

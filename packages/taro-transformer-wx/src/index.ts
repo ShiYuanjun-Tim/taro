@@ -432,7 +432,30 @@ export default function transform (options: Options): TransformResult {
       }
 
       if (IMAGE_COMPONENTS.has(name)) {
+
+        const sourceAttrPath = path.get('attributes')
+          .find(attrPath => attrPath.get('name').isJSXIdentifier({ name: 'source' }))
+        if (sourceAttrPath) {
+          // GAI:7 图片转换把source转化为src
+          const sourceobjPath = sourceAttrPath.get('value.expression')
+          let srcVal: any ;
+          if (sourceobjPath.isObjectExpression()) {
+            const uriPropertyPath = sourceobjPath.get('properties')
+              .find(property => property.get('key').isIdentifier({ name: 'uri' }))
+            srcVal = uriPropertyPath.node.value
+          } else if (sourceobjPath.isMemberExpression() || sourceobjPath.isIdentifier()) {
+            srcVal = t.memberExpression(sourceobjPath.node, t.identifier('uri'))
+          }
+
+          sourceAttrPath.replaceWith(t.jSXAttribute(
+            t.jSXIdentifier('src'),
+            t.jSXExpressionContainer(srcVal)
+          ) as any)
+
+        }
+
         for (const attr of path.node.attributes) {
+
           if (
             attr.name.name === 'src'
           ) {

@@ -442,7 +442,7 @@ export default function transform (options: Options): TransformResult {
           if (sourceobjPath.isObjectExpression()) {
             const uriPropertyPath = sourceobjPath.get('properties')
               .find(property => property.get('key').isIdentifier({ name: 'uri' }))
-            srcVal = uriPropertyPath.node.value
+            srcVal = (uriPropertyPath.node as t.ObjectProperty).value
           } else if (sourceobjPath.isMemberExpression() || sourceobjPath.isIdentifier()) {
             srcVal = t.memberExpression(sourceobjPath.node, t.identifier('uri'))
           }
@@ -450,7 +450,7 @@ export default function transform (options: Options): TransformResult {
           sourceAttrPath.replaceWith(t.jSXAttribute(
             t.jSXIdentifier('src'),
             t.jSXExpressionContainer(srcVal)
-          ) as any)
+          ))
 
         }
 

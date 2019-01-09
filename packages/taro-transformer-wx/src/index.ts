@@ -1,6 +1,7 @@
 import traverse, { Binding, NodePath } from 'babel-traverse'
 import generate from 'babel-generator'
 import * as fs from 'fs'
+import * as pathM from 'path'
 // import { prettyPrint } from 'html'
 import { transform as parse } from 'babel-core'
 import * as ts from 'typescript'
@@ -12,6 +13,7 @@ import { Adapters, setAdapter, Adapter } from './adapter'
 import { Options, setTransformOptions } from './options'
 import { get as safeGet } from 'lodash'
 import { eslintValidation } from './eslint'
+
 
 const template = require('babel-template')
 
@@ -445,6 +447,18 @@ export default function transform (options: Options): TransformResult {
             srcVal = (uriPropertyPath.node as t.ObjectProperty).value
           } else if (sourceobjPath.isMemberExpression() || sourceobjPath.isIdentifier()) {
             srcVal = t.memberExpression(sourceobjPath.node, t.identifier('uri'))
+          } else if (sourceobjPath.isCallExpression()
+            && t.isIdentifier(sourceobjPath.node.callee, { name: 'require' })) {
+            srcVal = sourceobjPath.get('arguments.0').node
+
+            // 本地图片base64编码
+            const ext = pathM.extname(srcVal.value).substr(1)
+            const imgPath = pathM.join(
+              pathM.dirname(options.sourcePath),
+              srcVal.value
+            )
+            const base64img = fs.readFileSync(imgPath).toString('base64')
+            srcVal = t.stringLiteral(`data:image/${ext};base64,${base64img}`)
           }
 
           sourceAttrPath.replaceWith(t.jSXAttribute(

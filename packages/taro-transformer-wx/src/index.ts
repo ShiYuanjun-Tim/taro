@@ -1,7 +1,6 @@
 import traverse, { Binding, NodePath } from 'babel-traverse'
 import generate from 'babel-generator'
 import * as fs from 'fs'
-import * as pathM from 'path'
 // import { prettyPrint } from 'html'
 import { transform as parse } from 'babel-core'
 import * as ts from 'typescript'
@@ -13,7 +12,7 @@ import { Adapters, setAdapter, Adapter } from './adapter'
 import { Options, setTransformOptions } from './options'
 import { get as safeGet } from 'lodash'
 import { eslintValidation } from './eslint'
-
+import imageTransformer from './patchs/imagePatch'
 
 const template = require('babel-template')
 
@@ -434,39 +433,7 @@ export default function transform (options: Options): TransformResult {
       }
 
       if (IMAGE_COMPONENTS.has(name)) {
-
-        const sourceAttrPath = path.get('attributes')
-          .find(attrPath => attrPath.get('name').isJSXIdentifier({ name: 'source' }))
-        if (sourceAttrPath) {
-          // GAI:7 图片转换把source转化为src
-          const sourceobjPath = sourceAttrPath.get('value.expression')
-          let srcVal: any ;
-          if (sourceobjPath.isObjectExpression()) {
-            const uriPropertyPath = sourceobjPath.get('properties')
-              .find(property => property.get('key').isIdentifier({ name: 'uri' }))
-            srcVal = (uriPropertyPath.node as t.ObjectProperty).value
-          } else if (sourceobjPath.isMemberExpression() || sourceobjPath.isIdentifier()) {
-            srcVal = t.memberExpression(sourceobjPath.node, t.identifier('uri'))
-          } else if (sourceobjPath.isCallExpression()
-            && t.isIdentifier(sourceobjPath.node.callee, { name: 'require' })) {
-            srcVal = sourceobjPath.get('arguments.0').node
-
-            // 本地图片base64编码
-            const ext = pathM.extname(srcVal.value).substr(1)
-            const imgPath = pathM.join(
-              pathM.dirname(options.sourcePath),
-              srcVal.value
-            )
-            const base64img = fs.readFileSync(imgPath).toString('base64')
-            srcVal = t.stringLiteral(`data:image/${ext};base64,${base64img}`)
-          }
-
-          sourceAttrPath.replaceWith(t.jSXAttribute(
-            t.jSXIdentifier('src'),
-            t.jSXExpressionContainer(srcVal)
-          ))
-
-        }
+        imageTransformer(path, options.sourcePath)
 
         for (const attr of path.node.attributes) {
 

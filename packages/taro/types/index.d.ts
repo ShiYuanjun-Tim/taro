@@ -1,8 +1,12 @@
 export = Taro;
 export as namespace Taro;
-
+declare namespace JSX {
+  interface Element {}
+}
 declare namespace Taro {
-
+  const rn2wx : {
+    modeMapping:object
+  }
   interface PageNotFoundObject {
     /**
      * 不存在页面的路径

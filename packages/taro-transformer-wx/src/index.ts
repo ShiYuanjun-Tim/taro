@@ -12,7 +12,7 @@ import { Adapters, setAdapter, Adapter } from './adapter'
 import { Options, setTransformOptions } from './options'
 import { get as safeGet } from 'lodash'
 import { eslintValidation } from './eslint'
-import imageTransformer from './patchs/imagePatch'
+import imageTransformer, { varNameOfModeMap } from './patchs/imagePatch'
 
 const template = require('babel-template')
 
@@ -552,7 +552,8 @@ export default function transform (options: Options): TransformResult {
             // 把reactCompoent组件替换成 @tarojs/taro-weapp 的
             path.parentPath.insertAfter(
               t.importDeclaration([
-                t.importSpecifier(t.identifier('Component'), t.identifier('Component'))
+                t.importSpecifier(t.identifier('Component'), t.identifier('Component')),
+                t.importSpecifier(t.identifier(varNameOfModeMap), t.identifier('modeMapping'))
               ], t.stringLiteral('@tarojs/taro-weapp'))
             )
             path2remove.push(path)

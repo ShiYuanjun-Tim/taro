@@ -2,6 +2,7 @@ import * as t from 'babel-types'
 import { NodePath } from 'babel-traverse'
 import * as fs from 'fs'
 import * as pathM from 'path'
+import { rn2wx } from '@tarojs/taro'
 
 function build (val) {
   switch (Object.prototype.toString.call(val)) {
@@ -14,7 +15,7 @@ function build (val) {
   }
 }
 
-function buildObjectExpression (obj2Trun) {
+export function buildObjectExpression (obj2Trun) {
 
   return t.objectExpression(Object.keys(obj2Trun).map(key => {
     return t.objectProperty(
@@ -24,16 +25,8 @@ function buildObjectExpression (obj2Trun) {
   }))
 }
 
-const IMG_MODE_MAPPING = {
-  cover: 'aspectFill'
-  , contain: 'aspectFit'
-  , stretch: 'scaleToFill'
-  , repeat: 'scaleToFill'
-  , center: 'aspectFit'
-}
+export const varNameOfModeMap = '_modeMapping_' // 这个是在weapp模块导出的变量名
 
-const objectExpressionOfModeMap = buildObjectExpression(IMG_MODE_MAPPING)
-const propNameOfModeMap = 'IMG_MODE_MAPPING'
 /**
  *
  * @param path
@@ -78,16 +71,8 @@ export function resizeModeAttr2mode (path: NodePath<t.JSXAttribute>) {
   if (valuePath.isJSXExpressionContainer) {
     const expressionPath = valuePath.get('expression')
     if (expressionPath.isMemberExpression() || expressionPath.isIdentifier()) {
-      const funcPath = valuePath.getFunctionParent();
-      (funcPath.get('body') as any).unshiftContainer(
-        'body'
-        , t.variableDeclaration('const', [
-          t.variableDeclarator(t.identifier(propNameOfModeMap),
-            objectExpressionOfModeMap)
-        ])
-      )
 
-      resizeModeValExpression = t.memberExpression(t.identifier(propNameOfModeMap), expressionPath.node, true)
+      resizeModeValExpression = t.memberExpression(t.identifier(varNameOfModeMap), expressionPath.node, true)
     }
     if (expressionPath.isStringLiteral()) {
       resizeModeVal = expressionPath.node.value
@@ -96,7 +81,7 @@ export function resizeModeAttr2mode (path: NodePath<t.JSXAttribute>) {
 
   resizeModeValExpression = resizeModeValExpression
     ? resizeModeValExpression
-    : t.stringLiteral(IMG_MODE_MAPPING[resizeModeVal])
+    : t.stringLiteral(rn2wx.modeMapping[resizeModeVal])
 
   path.replaceWith(t.jSXAttribute(
     t.jSXIdentifier('mode'),

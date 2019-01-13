@@ -11,6 +11,16 @@ import { noPromiseApis, onAndSyncApis, otherApis, initPxTransform } from './nati
 
 const eventCenter = new Events()
 
+const rn2wx = {
+  modeMapping: {
+    cover: 'aspectFill',
+    contain: 'aspectFit',
+    stretch: 'scaleToFill',
+    repeat: 'scaleToFill',
+    center: 'aspectFit'
+  }
+}
+
 export {
   Component,
   Events,
@@ -25,7 +35,8 @@ export {
   noPromiseApis,
   onAndSyncApis,
   otherApis,
-  initPxTransform
+  initPxTransform,
+  rn2wx
 }
 
 export default {
@@ -42,5 +53,6 @@ export default {
   noPromiseApis,
   onAndSyncApis,
   otherApis,
-  initPxTransform
+  initPxTransform,
+  rn2wx
 }

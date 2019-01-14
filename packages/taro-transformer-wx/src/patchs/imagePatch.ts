@@ -4,27 +4,6 @@ import * as fs from 'fs'
 import * as pathM from 'path'
 import { rn2wx } from '@tarojs/taro'
 
-function build (val) {
-  switch (Object.prototype.toString.call(val)) {
-    case '[object String]': return t.stringLiteral(val)
-    case '[object Number]': return t.numericLiteral(val)
-    case '[object Boolean]': return t.booleanLiteral(val)
-    case '[object Undefined]':
-    case '[object Null]': return t.nullLiteral()
-    default: throw new Error('没有匹配到类型')
-  }
-}
-
-export function buildObjectExpression (obj2Trun) {
-
-  return t.objectExpression(Object.keys(obj2Trun).map(key => {
-    return t.objectProperty(
-      t.stringLiteral(key),
-      build(obj2Trun[key])
-      )
-  }))
-}
-
 export const varNameOfModeMap = '_modeMapping_' // 这个是在weapp模块导出的变量名
 
 /**
@@ -100,7 +79,7 @@ export function resizeModeAttr2mode (path: NodePath<t.JSXAttribute>) {
 export function sourceAttr2src (path: NodePath<t.JSXAttribute>, sourcePath: string) {
 
   const sourceobjPath = path.get('value.expression')
-  let srcVal: any;
+  let srcVal: any
 
   if (sourceobjPath.isObjectExpression()) {
     // transfer {{uri:xxx}}

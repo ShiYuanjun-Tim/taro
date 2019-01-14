@@ -13,6 +13,7 @@ import { Options, setTransformOptions } from './options'
 import { get as safeGet } from 'lodash'
 import { eslintValidation } from './eslint'
 import imageTransformer, { varNameOfModeMap } from './patchs/imagePatch'
+import scrollViewTransformer from './patchs/scrollViewPatch'
 
 const template = require('babel-template')
 
@@ -431,6 +432,9 @@ export default function transform (options: Options): TransformResult {
           path.node.attributes = []
         }
       }
+      if (name === 'ScrollView') {
+        scrollViewTransformer(path)
+      }
 
       if (IMAGE_COMPONENTS.has(name)) {
         imageTransformer(path, options.sourcePath)
@@ -560,7 +564,7 @@ export default function transform (options: Options): TransformResult {
           } else {
             // GAI:6  import的rn组件中一部分需要替换掉比如Touchable.* 全部用view替换
             const localImportName = path.node.local.name
-            const isTouchable = localImportName.startsWith('Touchable')
+            const isTouchable = path.node.imported.name.startsWith('Touchable')
             const isRNCompNeedReplace = isImportFromRN && replacementOfRnComp.has(localImportName)
             if (isRNCompNeedReplace) {
 

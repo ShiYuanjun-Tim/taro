@@ -41,7 +41,7 @@ export function inlineStyle (obj) {
   return Object.keys(allStyle).map((key) => {
     let val = allStyle[key]
     // 添加单位
-    if (sizeableStyleKey.test(key)) {
+    if (sizeableStyleKey.test(key) && typeof val === 'number') {
       val += 'px'
     }
     return dashify(key).concat(':').concat(val)

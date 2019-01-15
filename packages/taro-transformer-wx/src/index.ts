@@ -12,9 +12,13 @@ import { Adapters, setAdapter, Adapter } from './adapter'
 import { Options, setTransformOptions } from './options'
 import { get as safeGet } from 'lodash'
 import { eslintValidation } from './eslint'
-import imageTransformer, { varNameOfModeMap } from './patchs/imagePatch'
+import imageTransformer, {
+  varNameOfModeMap ,
+  varNameOfSourceGuard,
+  turnRequireLocalImgToBase64Str } from './patchs/imagePatch'
 import scrollViewTransformer from './patchs/scrollViewPatch'
 import { initStyle , appendStyle } from './patchs/utils'
+import {rn2wx} from '@tarojs/taro'
 
 const template = require('babel-template')
 
@@ -298,7 +302,13 @@ export default function transform (options: Options): TransformResult {
       ) {
         const styleObj = path.get('arguments.0')
         path.replaceWith(styleObj)
-        return
+      }
+
+      if (callee.isIdentifier({ name: 'require' })) {
+        const base64 = turnRequireLocalImgToBase64Str(path, options.sourcePath)
+        if (base64) {
+          path.replaceWith(base64)
+        }
       }
 
       if (callee.isReferencedMemberExpression()) {
@@ -571,7 +581,8 @@ export default function transform (options: Options): TransformResult {
             path.parentPath.insertAfter(
               t.importDeclaration([
                 t.importSpecifier(t.identifier('Component'), t.identifier('Component')),
-                t.importSpecifier(t.identifier(varNameOfModeMap), t.identifier('modeMapping'))
+                t.importSpecifier(t.identifier(varNameOfModeMap), t.identifier(rn2wx.varNames.modeMapping)),
+                t.importSpecifier(t.identifier(varNameOfSourceGuard), t.identifier(rn2wx.varNames.sourceGuardFun))
               ], t.stringLiteral('@tarojs/taro-weapp'))
             )
             path2remove.push(path)

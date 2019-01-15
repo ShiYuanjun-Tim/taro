@@ -6,6 +6,7 @@ import { rn2wx } from '@tarojs/taro'
 
 export const varNameOfModeMap = '_modeMapping_' // 这个是在weapp模块导出的变量名
 
+export const varNameOfSourceGuard = '_sourceGuard_'
 /**
  *
  * @param path
@@ -58,9 +59,10 @@ export function resizeModeAttr2mode (path: NodePath<t.JSXAttribute>) {
     }
   }
 
+  const key = rn2wx.varNames.modeMapping
   resizeModeValExpression = resizeModeValExpression
     ? resizeModeValExpression
-    : t.stringLiteral(rn2wx.modeMapping[resizeModeVal])
+    : t.stringLiteral(rn2wx[key][resizeModeVal])
 
   path.replaceWith(t.jSXAttribute(
     t.jSXIdentifier('mode'),
@@ -88,24 +90,38 @@ export function sourceAttr2src (path: NodePath<t.JSXAttribute>, sourcePath: stri
     srcVal = (uriPropertyPath.node as t.ObjectProperty).value
   } else if (sourceobjPath.isMemberExpression() || sourceobjPath.isIdentifier()) {
     // transfer {a} /  {a.b}
-    srcVal = t.memberExpression(sourceobjPath.node, t.identifier('uri'))
+    srcVal = t.callExpression(t.identifier(varNameOfSourceGuard), [sourceobjPath.node])
   } else if (sourceobjPath.isCallExpression()
     && t.isIdentifier(sourceobjPath.node.callee, { name: 'require' })) {
     // transfer {require('xxxx')}
-    srcVal = sourceobjPath.get('arguments.0').node
-
-    // 本地图片base64编码
-    const ext = pathM.extname(srcVal.value).substr(1)
-    const imgPath = pathM.join(
-      pathM.dirname(sourcePath),
-      srcVal.value
-    )
-    const base64img = fs.readFileSync(imgPath).toString('base64')
-    srcVal = t.stringLiteral(`data:image/${ext};base64,${base64img}`)
+    srcVal = turnRequireLocalImgToBase64Str(sourceobjPath , sourcePath)
+  } else if (sourceobjPath.isStringLiteral()) {
+  } else {
+    console.log('image source is not recognized, please check!')
   }
 
   path.replaceWith(t.jSXAttribute(
     t.jSXIdentifier('src'),
     t.jSXExpressionContainer(srcVal)
   ))
+}
+
+/**
+ * 把本地资源require("path/to/img") 转化为base64编码
+ * @param requireCallExprPath
+ * @param sourcePath
+ */
+export function turnRequireLocalImgToBase64Str (requireCallExprPath: NodePath<t.CallExpression>, sourcePath: string): t.StringLiteral | null {
+  const srcVal = requireCallExprPath.get('arguments.0').node
+  if (t.isStringLiteral(srcVal)) {
+    // 本地图片base64编码
+    const ext = pathM.extname(srcVal.value).substr(1)
+    const imgPath = pathM.isAbsolute(srcVal.value) ? srcVal.value : pathM.join(
+      pathM.dirname(sourcePath),
+      srcVal.value
+    )
+    const base64img = fs.readFileSync(imgPath).toString('base64')
+    return t.stringLiteral(`data:image/${ext};base64,${base64img}`)
+  }
+  return null
 }

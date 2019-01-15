@@ -5,7 +5,11 @@ declare namespace JSX {
 }
 declare namespace Taro {
   const rn2wx : {
-    modeMapping:object
+    modeMapping: object;
+    varNames:{
+      sourceGuardFun:string;
+      modeMapping: string
+    }
   }
   interface PageNotFoundObject {
     /**

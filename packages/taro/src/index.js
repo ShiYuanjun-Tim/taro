@@ -18,7 +18,12 @@ const rn2wx = {
     stretch: 'scaleToFill',
     repeat: 'scaleToFill',
     center: 'aspectFit'
+  },
+  varNames: {
+    sourceGuardFun: 'runtimeGuard',
+    modeMapping: 'modeMapping'
   }
+
 }
 
 export {

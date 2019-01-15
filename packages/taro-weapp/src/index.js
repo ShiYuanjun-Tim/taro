@@ -35,7 +35,18 @@ export const Taro = {
   createComponent,
   internal_get_original,
   getElementById,
-  modeMapping: rn2wx.modeMapping
+  [rn2wx.varNames.modeMapping]: rn2wx[rn2wx.varNames.modeMapping],
+  [rn2wx.varNames.sourceGuardFun]: function (source) {
+    // 图片资源的source在运行时难以判定是对象还是字符串，利用运行时更简单
+    if (
+      Object.prototype.toString.call(source) === '[object Object]' &&
+      'uri' in source
+    ) {
+      return source.uri
+    }
+
+    return source
+  }
 }
 
 export default Taro

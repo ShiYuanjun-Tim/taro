@@ -14,6 +14,7 @@ import { get as safeGet } from 'lodash'
 import { eslintValidation } from './eslint'
 import imageTransformer, { varNameOfModeMap } from './patchs/imagePatch'
 import scrollViewTransformer from './patchs/scrollViewPatch'
+import { initStyle , appendStyle } from './patchs/utils'
 
 const template = require('babel-template')
 
@@ -457,6 +458,18 @@ export default function transform (options: Options): TransformResult {
     },
     JSXAttribute (path) {
       const { name, value } = path.node
+
+      if (name.name === 'flexContainer') {
+        // GAI:10 自定义的一个属性， 用于补充wx平台的样式
+        const styleAttrPath = path.parentPath.get('attributes')
+          .find(attrPath => attrPath.get('name').isJSXIdentifier({ name: 'style' }))
+        const stylePatch = { width: '100%', flexDirection: 'column', display: 'flex' }
+        styleAttrPath
+        ? appendStyle(styleAttrPath as NodePath<t.JSXAttribute>, stylePatch, true)
+        : initStyle(path.parentPath as NodePath<t.JSXOpeningElement> , stylePatch)
+        path.remove()
+      }
+
       if (!t.isJSXIdentifier(name) || value === null || t.isStringLiteral(value) || t.isJSXElement(value)) {
         return
       }
@@ -500,6 +513,7 @@ export default function transform (options: Options): TransformResult {
 
         // @TODO: bind 的处理待定
       }
+
     },
     ImportDeclaration (path) {
       const source = path.node.source.value

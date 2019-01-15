@@ -35,9 +35,9 @@ export function inlineStyle (obj) {
     throw new TypeError('style 只能是一个对象或字符串。')
   }
 
-  if ('flexDirection' in allStyle) {
-    allStyle['display'] = 'flex'
-  }
+  // if ('flexDirection' in allStyle) {
+  //   allStyle['display'] = 'flex'
+  // }
   return Object.keys(allStyle).map((key) => {
     let val = allStyle[key]
     // 添加单位
@@ -48,4 +48,4 @@ export function inlineStyle (obj) {
   }).join(';')
 }
 
-const sizeableStyleKey = /(width)|(height)|(top)|(bottom)|(right)|(left)|(border.*width)|(border.*radius)|(fontSize)|(padding.*)|(margin.*)/i
+const sizeableStyleKey = /^(width)|(height)|(top)|(bottom)|(right)|(left)|(border.*width)|(border.*radius)|(fontSize)|(padding.*)|(margin.*)$/i

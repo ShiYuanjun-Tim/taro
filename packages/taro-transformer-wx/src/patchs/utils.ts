@@ -25,15 +25,19 @@ export function buildObjectExpression (obj2Trun: object): t.ObjectExpression {
 
 /* style样式辅助 */
 
-export function appendStyle (stylePath: NodePath<t.JSXAttribute>, styleObj: object) {
+// 添加新样式 可添加头部/尾部(default)
+export function appendStyle (stylePath: NodePath<t.JSXAttribute>, styleObj: object, appendToHead: boolean = false) {
   const additonalStyobj = buildObjectExpression(styleObj)
   const styExpressoinPath = stylePath.get('value.expression')
-  if (styExpressoinPath.isArrayExpression()) {
-    (styExpressoinPath as any).pushContainer('elements', additonalStyobj)
+  let availablePath
+  if (styExpressoinPath.isArrayExpression() || styExpressoinPath.isObjectExpression()) {
+    availablePath = styExpressoinPath
+  } else if (styExpressoinPath.isCallExpression()) {
+    availablePath = styExpressoinPath.get('arguments.0')
   } else {
-    const newsStyleNode = t.arrayExpression([styExpressoinPath.node as t.Expression, additonalStyobj])
-    styExpressoinPath.replaceWith(newsStyleNode)
+    throw new Error('unknow typeof style value')
   }
+  _appendStyleToArrayOrObject(availablePath , additonalStyobj , appendToHead)
 }
 
 export function initStyle (path: NodePath<t.JSXOpeningElement>, styleObj: object) {
@@ -46,7 +50,7 @@ export function initStyle (path: NodePath<t.JSXOpeningElement>, styleObj: object
   )
 }
 
-export function addStyle2Items (itemPaths: Array<NodePath<t.JSXElement>>, styleObj: object) {
+export function addStyle2Items (itemPaths: Array<NodePath<t.JSXElement>>, styleObj: object , appendToHead: boolean = false) {
 
   itemPaths.forEach(itemPath => {
     const openingElePath = itemPath.get('openingElement') as NodePath<t.JSXOpeningElement>
@@ -54,10 +58,27 @@ export function addStyle2Items (itemPaths: Array<NodePath<t.JSXElement>>, styleO
       .find(attrPath => attrPath.get('name').isJSXIdentifier({ name: 'style' })) as NodePath<t.JSXAttribute>
 
     if (styleAttrPath) {
-      appendStyle(styleAttrPath, styleObj)
+      appendStyle(styleAttrPath, styleObj, appendToHead)
     } else {
       initStyle(openingElePath, styleObj)
     }
   })
 
+}
+
+function _appendStyleToArrayOrObject (
+  path: NodePath<t.ObjectExpression | t.ArrayExpression>,
+  additonalStyObjExp: t.ObjectExpression,
+  appendToHead: boolean
+) {
+  if (path.isArrayExpression()) {
+    const funname = appendToHead ? 'unshiftContainer' : 'pushContainer';
+    (path as any)[funname]('elements', additonalStyObjExp)
+  } else if (path.isObjectExpression()) {
+    const styleArr = [path.node as t.Expression, additonalStyObjExp]
+    const newsStyleNode = t.arrayExpression(appendToHead ? styleArr.reverse() : styleArr)
+    path.replaceWith(newsStyleNode)
+  } else {
+    throw new Error('error typeof path')
+  }
 }

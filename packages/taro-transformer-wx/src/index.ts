@@ -463,7 +463,7 @@ export default function transform (options: Options): TransformResult {
         // GAI:10 自定义的一个属性， 用于补充wx平台的样式
         const styleAttrPath = path.parentPath.get('attributes')
           .find(attrPath => attrPath.get('name').isJSXIdentifier({ name: 'style' }))
-        const stylePatch = { width: '100%', flexDirection: 'column', display: 'flex' }
+        const stylePatch = { /* width: '100%', */ flexDirection: 'column', display: 'flex' }
         styleAttrPath
         ? appendStyle(styleAttrPath as NodePath<t.JSXAttribute>, stylePatch, true)
         : initStyle(path.parentPath as NodePath<t.JSXOpeningElement> , stylePatch)

@@ -35,9 +35,10 @@ export function inlineStyle (obj) {
     throw new TypeError('style 只能是一个对象或字符串。')
   }
 
-  // if ('flexDirection' in allStyle) {
-  //   allStyle['display'] = 'flex'
-  // }
+  // detect width when flexDirection is row
+  if (allStyle.flexDirection === 'row' && !('width' in allStyle)) {
+    allStyle['width'] = '100%'
+  }
   return Object.keys(allStyle).map((key) => {
     let val = allStyle[key]
     // 添加单位

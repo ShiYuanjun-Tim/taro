@@ -23,11 +23,16 @@ export function buildObjectExpression (obj2Trun: object): t.ObjectExpression {
   }))
 }
 
-/* style样式辅助 */
+/* style样式辅助方法
+  add*  有style则append* / 无style则init*
+  init*  添加style属性
+  append* 追加（头部或尾部）样式
+*/
 
 // 添加新样式 可添加头部/尾部(default)
-export function appendStyle (stylePath: NodePath<t.JSXAttribute>, styleObj: object, appendToHead: boolean = false) {
-  const additonalStyobj = buildObjectExpression(styleObj)
+export function appendStyle (stylePath: NodePath<t.JSXAttribute>, styleObj: object, appendToHead?: boolean): void
+export function appendStyle (stylePath: NodePath<t.JSXAttribute>, styleObj: t.ObjectExpression, appendToHead: boolean = false): void {
+  const additonalStyobj = t.isObjectExpression(styleObj) ? styleObj : buildObjectExpression(styleObj)
   const styExpressoinPath = stylePath.get('value.expression')
   let availablePath
   if (styExpressoinPath.isArrayExpression() || styExpressoinPath.isObjectExpression()) {
@@ -40,8 +45,9 @@ export function appendStyle (stylePath: NodePath<t.JSXAttribute>, styleObj: obje
   _appendStyleToArrayOrObject(availablePath , additonalStyobj , appendToHead)
 }
 
-export function initStyle (path: NodePath<t.JSXOpeningElement>, styleObj: object) {
-  const additonalStyobj = buildObjectExpression(styleObj);
+export function initStyle (path: NodePath<t.JSXOpeningElement>, styleObj: object): void
+export function initStyle (path: NodePath<t.JSXOpeningElement>, styleObj: t.ObjectExpression): void {
+  const additonalStyobj = t.isObjectExpression(styleObj) ? styleObj : buildObjectExpression(styleObj);
   (path as any).pushContainer('attributes',
     t.jSXAttribute(
       t.jSXIdentifier('style'),
@@ -50,20 +56,20 @@ export function initStyle (path: NodePath<t.JSXOpeningElement>, styleObj: object
   )
 }
 
-export function addStyle2Items (itemPaths: Array<NodePath<t.JSXElement>>, styleObj: object , appendToHead: boolean = false) {
+export function addStyle2Items (itemPaths: Array<NodePath<t.JSXElement>>, styleObj: object , appendToHead?: boolean): void
+export function addStyle2Items (itemPaths: Array<NodePath<t.JSXElement>>, styleObj: t.ObjectExpression , appendToHead: boolean = false): void {
+  itemPaths.forEach(itemPath => addStyle(itemPath.get('openingElement') as NodePath<t.JSXOpeningElement> , styleObj , appendToHead))
+}
 
-  itemPaths.forEach(itemPath => {
-    const openingElePath = itemPath.get('openingElement') as NodePath<t.JSXOpeningElement>
-    const styleAttrPath = openingElePath.get('attributes')
-      .find(attrPath => attrPath.get('name').isJSXIdentifier({ name: 'style' })) as NodePath<t.JSXAttribute>
-
-    if (styleAttrPath) {
-      appendStyle(styleAttrPath, styleObj, appendToHead)
-    } else {
-      initStyle(openingElePath, styleObj)
-    }
-  })
-
+export function addStyle (openingElePath: NodePath<t.JSXOpeningElement>, styleObj: object , appendToHead?: boolean): void
+export function addStyle (openingElePath: NodePath<t.JSXOpeningElement>, styleObj: t.ObjectExpression , appendToHead: boolean = false): void {
+  const styleAttrPath = openingElePath.get('attributes')
+    .find(attrPath => attrPath.get('name').isJSXIdentifier({ name: 'style' })) as NodePath<t.JSXAttribute>
+  if (styleAttrPath) {
+    appendStyle(styleAttrPath, styleObj, appendToHead)
+  } else {
+    initStyle(openingElePath, styleObj)
+  }
 }
 
 function _appendStyleToArrayOrObject (

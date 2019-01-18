@@ -1,6 +1,6 @@
 import * as t from 'babel-types'
 import { NodePath } from 'babel-traverse'
-import { addStyle2Items,appendStyle,initStyle } from './utils'
+import { addStyle2Items, addStyle } from './utils'
 
 const scrollXStylePatch = {
   container: {
@@ -27,16 +27,15 @@ export default function scrollViewTransformer (path: NodePath<t.JSXOpeningElemen
   */
   const horizontalPath = attrArr.find(attr => attr.node.name.name === 'horizontal')
   const isHorizontal = !!horizontalPath
-  let hasStyle = false
+
+  let contentContainerStylePath
   attrArr.forEach(attrPath => {
     const attrName = attrPath.node.name.name
     switch (attrName) {
       case 'contentContainerStyle':
-        attrPath.remove()
+        contentContainerStylePath = attrPath
         break
       case 'style':
-        hasStyle = true
-        isHorizontal && appendStyle(attrPath, scrollXStylePatch.container)
         break
         // 只是换名字的属性在这里
       case 'onScroll':
@@ -57,17 +56,18 @@ export default function scrollViewTransformer (path: NodePath<t.JSXOpeningElemen
   (path as any).unshiftContainer('attributes',
     t.jSXAttribute(t.jSXIdentifier(isHorizontal ? 'scroll-x' : 'scroll-y')))
 
+  if (contentContainerStylePath) {
+      // 合并contentContainerStylePath 到 style
+    addStyle(path , contentContainerStylePath.get('value.expression').node)
+    contentContainerStylePath.remove()
+  }
+
     // 处理水平滚动情况的样式
   if (isHorizontal) {
-
-    if (!hasStyle) {
-      initStyle(path, scrollXStylePatch.container)
-    }
-
+    addStyle(path , scrollXStylePatch.container)
     addStyle2Items(
       (path.parentPath.get('children') as any).filter(child => child.isJSXElement()),
       scrollXStylePatch.item
     )
   }
-
 }

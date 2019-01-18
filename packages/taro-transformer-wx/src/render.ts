@@ -106,6 +106,28 @@ function buildAssignState (
   )
 }
 
+const onPress = {
+  'onPress': (shouldCatch) => shouldCatch ? 'catchtap' : 'bindtap'
+}
+const CompPropNameReplaceRule = {
+  ScrollView: {
+    onScroll: 'bindscroll'
+  },
+  Button: onPress,
+  Text: onPress,
+  View: onPress,
+
+  findPropName(compName, propName, eventShouldBeCatched) {
+    const set = this[compName]
+    if (!set) return null
+    const trans = set[propName]
+    if (!trans) return null
+    if (typeof trans === 'function') {
+      return trans(eventShouldBeCatched)
+    }
+    return trans
+  }
+}
 export class RenderParser {
   public outputTemplate: string
 
@@ -812,12 +834,12 @@ export class RenderParser {
             } else if (DEFAULT_Component_SET.has(componentName)) {
               let transformName = `${eventShouldBeCatched ? 'catch' : 'bind'}`
                 + name.name.slice(2).toLowerCase()
-              if (
-                name.name === 'onClick' ||
-                // 1. GAI:5  检测 Text/Button的onPress方法 ，转化成bindtap
-                (/(^Text$)|(^Button$)/i.test(componentName) && (name.name === 'onPress'))
-              ) {
+              if (name.name === 'onClick') {
                 transformName = eventShouldBeCatched ? 'catchtap' : 'bindtap'
+              } else {
+                 // 1. GAI:5  检测各组件的 on*事件
+                const newName = CompPropNameReplaceRule.findPropName(componentName, name.name ,eventShouldBeCatched)
+                newName && (transformName = newName)
               }
               path.node.name = t.jSXIdentifier(transformName)
             } else if (THIRD_PARTY_COMPONENTS.has(componentName)) {

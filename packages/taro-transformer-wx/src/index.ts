@@ -598,13 +598,6 @@ export default function transform (options: Options): TransformResult {
               importBinding && importBinding.referencePaths.forEach(refsPath => {
                 if (refsPath.isJSXIdentifier()) {
                   refsPath.replaceWith(t.jSXIdentifier(replacement))
-                  // GAI:6  并且修改onPresss到bindtap
-                  if (isTouchable && refsPath.parentPath.isJSXOpeningElement()) {
-                    const onPressAttrPath = refsPath.parentPath
-                      .get('attributes')
-                      .find(attrPath => attrPath.get('name').isJSXIdentifier({ name: 'onPress' }))
-                    onPressAttrPath && onPressAttrPath.get('name').replaceWith(t.jSXIdentifier('bindtap'))
-                  }
                 }
               })
 

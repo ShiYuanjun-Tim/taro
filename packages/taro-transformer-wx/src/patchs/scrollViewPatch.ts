@@ -12,7 +12,7 @@ const scrollXStylePatch = {
 }
 
 const attrNameMap = {
-  onScroll: 'bindscroll',
+  onScroll: 'bindscroll', // on* 开头的属性必须在render.ts中处理
   scrollsToTop: 'enable-back-to-top'
 }
 // GAI:9 scrollView的RN到微信转化
@@ -38,7 +38,7 @@ export default function scrollViewTransformer (path: NodePath<t.JSXOpeningElemen
       case 'style':
         break
         // 只是换名字的属性在这里
-      case 'onScroll':
+      // case 'onScroll': //需要在render.ts中进行替换
       case 'scrollsToTop':
         attrPath.get('name').replaceWith(t.jSXIdentifier(attrNameMap[attrName]))
         break
@@ -49,7 +49,7 @@ export default function scrollViewTransformer (path: NodePath<t.JSXOpeningElemen
       case 'bindscrolltolower':
         break
       // 不转换的属性一起删除
-      default: attrPath.remove()
+      // default: attrPath.remove()
     }
   });
 

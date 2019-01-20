@@ -589,7 +589,7 @@ export default function transform (options: Options): TransformResult {
           } else {
             // GAI:6  import的rn组件中一部分需要替换掉比如Touchable.* 全部用view替换
             const localImportName = path.node.local.name
-            const isTouchable = path.node.imported.name.startsWith('Touchable')
+            // const isTouchable = path.node.imported.name.startsWith('Touchable')
             const isRNCompNeedReplace = isImportFromRN && replacementOfRnComp.has(localImportName)
             if (isRNCompNeedReplace) {
 

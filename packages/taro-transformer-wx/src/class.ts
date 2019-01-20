@@ -1,5 +1,6 @@
 import { NodePath } from 'babel-traverse'
 import * as t from 'babel-types'
+const template = require('babel-template')
 import {
   codeFrameError,
   hasComplexExpression,
@@ -148,19 +149,43 @@ class Transformer {
     body.push(multipleSlots)
   }
 
-  createStringRef (componentName: string, id: string, refName: string) {
+  createStringRef (openingElePath: NodePath<t.JSXOpeningElement>, id: string, refName: string) {
+    const componentName = (openingElePath.node.name as t.JSXIdentifier).name
+    const buildReuqire = template(
+      `(ref) => {
+        const refs = this.refs || {}
+        refs[REF_NAME] = ref
+        this.refs = refs
+      }
+      `
+    )
+    const ast = buildReuqire({
+      REF_NAME: t.stringLiteral(refName)
+    })
     this.refs.push({
       type: DEFAULT_Component_SET.has(componentName) ? 'dom' : 'component',
       id,
-      refName
+      fn : ast.expression
     })
   }
 
-  createFunctionRef (componentName: string, id: string, fn) {
+  createFunctionRef (openingElePath: NodePath<t.JSXOpeningElement>, id: string, fn) {
+    const componentName = (openingElePath.node.name as t.JSXIdentifier).name
+
+    const buildReuqire = template(
+      `(ref) => {
+       ( ORIGIN_FUN )(ref)
+      }
+      `
+    )
+    const ast = buildReuqire({
+      ORIGIN_FUN: fn
+    })
+
     this.refs.push({
       type: DEFAULT_Component_SET.has(componentName) ? 'dom' : 'component',
       id,
-      fn
+      fn: ast.expression
     })
   }
 
@@ -243,7 +268,7 @@ class Transformer {
           if (loopCallExpr) {
             throw codeFrameError(refAttr, '循环中的 ref 只能使用函数。')
           }
-          this.createStringRef(componentName, id, refAttr.value.value)
+          this.createStringRef(path, id, refAttr.value.value)
         }
         if (t.isJSXExpressionContainer(refAttr.value)) {
           const expr = refAttr.value.expression
@@ -251,7 +276,7 @@ class Transformer {
             if (loopCallExpr) {
               throw codeFrameError(refAttr, '循环中的 ref 只能使用函数。')
             }
-            this.createStringRef(componentName, id, expr.value)
+            this.createStringRef(path, id, expr.value)
           } else if (t.isArrowFunctionExpression(expr) || t.isMemberExpression(expr)) {
             const type = DEFAULT_Component_SET.has(componentName) ? 'dom' : 'component'
             if (loopCallExpr) {
@@ -262,11 +287,7 @@ class Transformer {
                 component: path.parentPath as NodePath<t.JSXElement>
               })
             } else {
-              this.refs.push({
-                type,
-                id,
-                fn: expr
-              })
+              this.createFunctionRef(path, id , expr)
             }
           } else {
             throw codeFrameError(refAttr, 'ref 仅支持传入字符串、匿名箭头函数和 class 中已声明的函数')

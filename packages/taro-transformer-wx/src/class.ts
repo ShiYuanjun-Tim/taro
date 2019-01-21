@@ -19,7 +19,7 @@ import { findJSXAttrByName } from './jsx'
 import { Adapters, Adapter } from './adapter'
 import { LoopRef } from './interface'
 import generate from 'babel-generator'
-
+import refPatcher from './patchs/refMethodsPatch'
 type ClassMethodsMap = Map<string, NodePath<t.ClassMethod | t.ClassProperty>>
 
 function buildConstructor () {
@@ -153,14 +153,14 @@ class Transformer {
     const componentName = (openingElePath.node.name as t.JSXIdentifier).name
     const buildReuqire = template(
       `(ref) => {
+        Object.assign(ref , REF_PATCH);
         const refs = this.refs || {}
         refs[REF_NAME] = ref
         this.refs = refs
-      }
-      `
-    )
+      }`)
     const ast = buildReuqire({
-      REF_NAME: t.stringLiteral(refName)
+      REF_NAME: t.stringLiteral(refName),
+      REF_PATCH: refPatcher(openingElePath)
     })
     this.refs.push({
       type: DEFAULT_Component_SET.has(componentName) ? 'dom' : 'component',
@@ -174,12 +174,14 @@ class Transformer {
 
     const buildReuqire = template(
       `(ref) => {
+        Object.assign(ref , REF_PATCH);
        ( ORIGIN_FUN )(ref)
       }
       `
     )
     const ast = buildReuqire({
-      ORIGIN_FUN: fn
+      ORIGIN_FUN: fn,
+      REF_PATCH: refPatcher(openingElePath)
     })
 
     this.refs.push({

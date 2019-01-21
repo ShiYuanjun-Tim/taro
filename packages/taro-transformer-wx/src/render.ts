@@ -44,6 +44,7 @@ import { transformOptions } from './options'
 import generate from 'babel-generator'
 import { LoopRef } from './interface'
 const template = require('babel-template')
+import findPropName from './patchs/onPropRenamePatch'
 
 type ClassMethodsMap = Map<string, NodePath<t.ClassMethod | t.ClassProperty>>
 
@@ -106,28 +107,6 @@ function buildAssignState (
   )
 }
 
-const onPress = {
-  'onPress': (shouldCatch) => shouldCatch ? 'catchtap' : 'bindtap'
-}
-const CompPropNameReplaceRule = {
-  ScrollView: {
-    onScroll: 'bindscroll'
-  },
-  Button: onPress,
-  Text: onPress,
-  View: onPress,
-
-  findPropName(compName, propName, eventShouldBeCatched) {
-    const set = this[compName]
-    if (!set) return null
-    const trans = set[propName]
-    if (!trans) return null
-    if (typeof trans === 'function') {
-      return trans(eventShouldBeCatched)
-    }
-    return trans
-  }
-}
 export class RenderParser {
   public outputTemplate: string
 
@@ -838,7 +817,7 @@ export class RenderParser {
                 transformName = eventShouldBeCatched ? 'catchtap' : 'bindtap'
               } else {
                  // 1. GAI:5  检测各组件的 on*事件
-                const newName = CompPropNameReplaceRule.findPropName(componentName, name.name ,eventShouldBeCatched)
+                const newName = findPropName(componentName, name.name ,eventShouldBeCatched)
                 newName && (transformName = newName)
               }
               path.node.name = t.jSXIdentifier(transformName)

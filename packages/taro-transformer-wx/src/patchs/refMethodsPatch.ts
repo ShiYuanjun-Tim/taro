@@ -1,3 +1,6 @@
+/*
+  这个补丁入口是提供给 微信原生组件上通过给ref打补丁来达到 使用ref.xxx()方法的补全， 类似scrollView在rn和wx端方法的缺失补充
+*/
 import * as t from 'babel-types'
 import { NodePath } from 'babel-traverse'
 const template = require('babel-template')
@@ -17,7 +20,7 @@ export default function getRefMethodsPatch (path: NodePath<t.JSXOpeningElement>)
 }
 
 function noop () {
-  return t.objectExpression()
+  return t.objectExpression([])
 }
 
 // GAI:11 scrollview的method scrollTo方法的转码实现

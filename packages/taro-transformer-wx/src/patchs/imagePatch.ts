@@ -17,6 +17,9 @@ export const varNameOfSourceGuard = '_sourceGuard_'
  *
  * resizeMode => mode
  *
+ * on开头的 成功失败在onPropRenamePatch中处理
+ * 其他wx不支持的on*属性被移除
+ *
  */
 export default function imageTransformer (path: NodePath<t.JSXOpeningElement>, sourcePath: string) {
 
@@ -28,6 +31,12 @@ export default function imageTransformer (path: NodePath<t.JSXOpeningElement>, s
       case 'source': sourceAttr2src(attrPath, sourcePath)
         break
       case 'resizeMode': resizeModeAttr2mode(attrPath)
+        break
+      case 'onLoadStart' :
+      case 'onLoadEnd' :
+      case 'onPartialLoad' :
+      case 'onProgress' :
+        attrPath.remove()
         break
     }
   })

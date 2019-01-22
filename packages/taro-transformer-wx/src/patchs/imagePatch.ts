@@ -7,6 +7,8 @@ import { rn2wx } from '@tarojs/taro'
 export const varNameOfModeMap = '_modeMapping_' // 这个是在weapp模块导出的变量名
 
 export const varNameOfSourceGuard = '_sourceGuard_'
+
+const IMG_SUPPORT = /^(JPG|JPEG|PNG|BMP|WEBP)$/i
 /**
  *
  * @param path
@@ -125,12 +127,14 @@ export function turnRequireLocalImgToBase64Str (requireCallExprPath: NodePath<t.
   if (t.isStringLiteral(srcVal)) {
     // 本地图片base64编码
     const ext = pathM.extname(srcVal.value).substr(1)
-    const imgPath = pathM.isAbsolute(srcVal.value) ? srcVal.value : pathM.join(
-      pathM.dirname(sourcePath),
-      srcVal.value
-    )
-    const base64img = fs.readFileSync(imgPath).toString('base64')
-    return t.stringLiteral(`data:image/${ext};base64,${base64img}`)
+    if (IMG_SUPPORT.test(ext)) {
+      const imgPath = pathM.isAbsolute(srcVal.value) ? srcVal.value : pathM.join(
+        pathM.dirname(sourcePath),
+        srcVal.value
+      )
+      const base64img = fs.readFileSync(imgPath).toString('base64')
+      return t.stringLiteral(`data:image/${ext};base64,${base64img}`)
+    }
   }
   return null
 }

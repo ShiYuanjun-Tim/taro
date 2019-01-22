@@ -17,7 +17,7 @@ import imageTransformer, {
   varNameOfSourceGuard,
   turnRequireLocalImgToBase64Str } from './patchs/imagePatch'
 import scrollViewTransformer from './patchs/scrollViewPatch'
-import { initStyle , appendStyle } from './patchs/utils'
+import { addStyle } from './patchs/utils'
 import {rn2wx} from '@tarojs/taro'
 
 const template = require('babel-template')
@@ -471,12 +471,8 @@ export default function transform (options: Options): TransformResult {
 
       if (name.name === 'flexContainer') {
         // GAI:10 自定义的一个属性， 用于补充wx平台的样式
-        const styleAttrPath = path.parentPath.get('attributes')
-          .find(attrPath => attrPath.get('name').isJSXIdentifier({ name: 'style' }))
         const stylePatch = { /* width: '100%', */ flexDirection: 'column', display: 'flex' }
-        styleAttrPath
-        ? appendStyle(styleAttrPath as NodePath<t.JSXAttribute>, stylePatch, true)
-        : initStyle(path.parentPath as NodePath<t.JSXOpeningElement> , stylePatch)
+        addStyle(path.parentPath as NodePath<t.JSXOpeningElement> , stylePatch , true)
         path.remove()
       }
 

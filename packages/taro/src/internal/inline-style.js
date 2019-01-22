@@ -43,7 +43,7 @@ export function inlineStyle (obj) {
     let val = allStyle[key]
     // 添加单位
     if (sizeableStyleKey.test(key) && typeof val === 'number') {
-      val += 'rpx'
+      val += 'px'
     }
     return dashify(key).concat(':').concat(val)
   }).join(';')

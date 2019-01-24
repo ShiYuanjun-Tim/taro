@@ -40,7 +40,8 @@
     "packages/taro-mobx-h5",
     "packages/taro-mobx-rn",
     "packages/taro-with-weapp",
-    "packages/taroize"
+    "packages/taroize",
+    "packages/rnapiPatch4wx"
   ],
   "command": {
     "publish": {

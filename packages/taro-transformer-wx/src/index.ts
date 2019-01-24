@@ -19,6 +19,7 @@ import imageTransformer, {
 import scrollViewTransformer from './patchs/scrollViewPatch'
 import { addStyle } from './patchs/utils'
 import {rn2wx} from '@tarojs/taro'
+import rnModuleImportPatch from './patchs/rnModuleImportPatch'
 
 const template = require('babel-template')
 
@@ -206,13 +207,6 @@ export default function transform (options: Options): TransformResult {
   let renderMethod!: NodePath<t.ClassMethod>
   let isImportTaro = false
 
-  const replacementOfRnComp = new Map<string, string>([
-    ['TouchableWithoutFeedback', 'View'],
-    ['TouchableHighlight', 'View'],
-    ['TouchableOpacity', 'View'],
-    ['TouchableNativeFeedback', 'View']
-  ])
-
   traverse(ast, {
     TemplateLiteral (path) {
       const nodes: t.Expression[] = []
@@ -295,15 +289,6 @@ export default function transform (options: Options): TransformResult {
       if (isContainJSXElement(path)) {
         return
       }
-      // GAI:4
-      if (callee.isMemberExpression()
-        && callee.get('object').isIdentifier({ name: 'StyleSheet' })
-        && callee.get('property').isIdentifier({ name: 'create' })
-      ) {
-        const styleObj = path.get('arguments.0')
-        path.replaceWith(styleObj)
-      }
-
       if (callee.isIdentifier({ name: 'require' })) {
         const base64 = turnRequireLocalImgToBase64Str(path, options.sourcePath)
         if (base64) {
@@ -551,13 +536,6 @@ export default function transform (options: Options): TransformResult {
         })
       }
 
-      const path2remove: NodePath<any>[] = []
-      const isImportFromRN = source === 'react-native'
-      if (isImportFromRN) {
-        // GAI:2
-        path2remove.push(path)
-      }
-
       path.traverse({
         ImportDefaultSpecifier (path) {
           const name = path.node.local.name
@@ -581,29 +559,13 @@ export default function transform (options: Options): TransformResult {
                 t.importSpecifier(t.identifier(varNameOfSourceGuard), t.identifier(rn2wx.varNames.sourceGuardFun))
               ], t.stringLiteral('@tarojs/taro-weapp'))
             )
-            path2remove.push(path)
-          } else {
-            // GAI:6  import的rn组件中一部分需要替换掉比如Touchable.* 全部用view替换
-            const localImportName = path.node.local.name
-            // const isTouchable = path.node.imported.name.startsWith('Touchable')
-            const isRNCompNeedReplace = isImportFromRN && replacementOfRnComp.has(localImportName)
-            if (isRNCompNeedReplace) {
-
-              const replacement = replacementOfRnComp.get(localImportName)
-              const importBinding = path.scope.getBinding(name)
-              importBinding && importBinding.referencePaths.forEach(refsPath => {
-                if (refsPath.isJSXIdentifier()) {
-                  refsPath.replaceWith(t.jSXIdentifier(replacement))
-                }
-              })
-
-            }
-
+            path.remove()
           }
         }
       })
-      path2remove.forEach(pt => pt.remove())
       componentSourceMap.set(source, names)
+
+      rnModuleImportPatch(path);
     }
   })
 

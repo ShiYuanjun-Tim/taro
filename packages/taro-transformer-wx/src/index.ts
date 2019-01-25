@@ -537,6 +537,24 @@ export default function transform (options: Options): TransformResult {
       }
 
       path.traverse({
+        // GAI:1
+        ImportNamespaceSpecifier (path) {
+          if (source === 'react') {
+            const reactName = path.node.local.name
+            const binding: Binding | undefined = path.scope.getBinding(reactName)
+            if (binding && binding.referenced) {
+              binding.referencePaths.forEach(refpath => {
+                if (refpath.parentPath.isMemberExpression()) {
+                  const isReactComponentImported = refpath.getSibling('property').isIdentifier({ name: 'Component' })
+                  if (isReactComponentImported) {
+                    refpath.parentPath.replaceWith(t.identifier('Component'))
+                    path.parentPath.insertAfter(getWeappImportDeclaration())
+                  }
+                }
+              })
+            }
+          }
+        },
         ImportDefaultSpecifier (path) {
           const name = path.node.local.name
           DEFAULT_Component_SET.has(name) || names.push(name)
@@ -552,13 +570,7 @@ export default function transform (options: Options): TransformResult {
           const isReactComponentImported = source === 'react' && name === 'Component'
           if (isReactComponentImported) {
             // 把reactCompoent组件替换成 @tarojs/taro-weapp 的
-            path.parentPath.insertAfter(
-              t.importDeclaration([
-                t.importSpecifier(t.identifier('Component'), t.identifier('Component')),
-                t.importSpecifier(t.identifier(varNameOfModeMap), t.identifier(rn2wx.varNames.modeMapping)),
-                t.importSpecifier(t.identifier(varNameOfSourceGuard), t.identifier(rn2wx.varNames.sourceGuardFun))
-              ], t.stringLiteral('@tarojs/taro-weapp'))
-            )
+            path.parentPath.insertAfter(getWeappImportDeclaration())
             path.remove()
           }
         }
@@ -619,4 +631,12 @@ export default function transform (options: Options): TransformResult {
   }) */
   result.imageSrcs = Array.from(imageSource)
   return result
+}
+
+function getWeappImportDeclaration (): t.ImportDeclaration {
+  return t.importDeclaration([
+    t.importSpecifier(t.identifier('Component'), t.identifier('Component')),
+    t.importSpecifier(t.identifier(varNameOfModeMap), t.identifier(rn2wx.varNames.modeMapping)),
+    t.importSpecifier(t.identifier(varNameOfSourceGuard), t.identifier(rn2wx.varNames.sourceGuardFun))
+  ], t.stringLiteral('@tarojs/taro-weapp'))
 }

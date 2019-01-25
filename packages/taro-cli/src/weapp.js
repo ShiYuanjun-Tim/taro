@@ -1043,6 +1043,13 @@ async function buildEntry () {
       adapter: buildAdapter,
       env: constantsReplaceList
     })
+    // GAI:13
+    const globalcssImportPath = './global.css'
+    const globalStylePath = path.resolve(path.dirname(entryFilePath), globalcssImportPath)
+    if (fs.existsSync(globalStylePath)) {
+      transformResult.ast.program.body.push(t.importDeclaration([], t.stringLiteral(globalcssImportPath)))
+    }
+
     // app.js的template忽略
     const res = parseAst(PARSE_AST_TYPE.ENTRY, transformResult.ast, [], entryFilePath, outputEntryFilePath)
     let resCode = res.code

@@ -547,7 +547,7 @@ export default function transform (options: Options): TransformResult {
                 if (refpath.parentPath.isMemberExpression()) {
                   const isReactComponentImported = refpath.getSibling('property').isIdentifier({ name: 'Component' })
                   if (isReactComponentImported) {
-                    refpath.parentPath.replaceWith(t.identifier('Component'))
+                    refpath.parentPath.replaceWith(t.identifier('__BaseComponent'))
                     path.parentPath.insertAfter(getWeappImportDeclaration())
                   }
                 }
@@ -635,7 +635,7 @@ export default function transform (options: Options): TransformResult {
 
 function getWeappImportDeclaration (): t.ImportDeclaration {
   return t.importDeclaration([
-    t.importSpecifier(t.identifier('Component'), t.identifier('Component')),
+    t.importSpecifier(t.identifier('__BaseComponent'), t.identifier('Component')),
     t.importSpecifier(t.identifier(varNameOfModeMap), t.identifier(rn2wx.varNames.modeMapping)),
     t.importSpecifier(t.identifier(varNameOfSourceGuard), t.identifier(rn2wx.varNames.sourceGuardFun))
   ], t.stringLiteral('@tarojs/taro-weapp'))

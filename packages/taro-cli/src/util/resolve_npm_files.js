@@ -28,7 +28,7 @@ const defaultBabelConfig = require('../config/babel')
 
 const npmProcess = require('./npm')
 
-const excludeNpmPkgs = ['ReactPropTypes']
+const excludeNpmPkgs = ['ReactPropTypes', 'react-native']
 
 const resolvedCache = {}
 const copyedFiles = {}
@@ -106,8 +106,22 @@ function parseAst (ast, filePath, files, isProduction, npmConfig, buildAdapter =
             const node = astPath.node
             const callee = node.callee
             if (callee.name === 'require') {
-              const args = node.arguments
-              let requirePath = args[0].value
+              const args = node.arguments[0]
+              let requirePath = args.value
+
+              if (!t.isStringLiteral(args)) {
+                if (t.isTemplateLiteral(args)) {
+                  if (args.node.expression.length === 0) {
+                    requirePath = args.quasis.map(ele => ele.value.cooked).join('')
+                  }
+                } else if (t.isIdentifier(args)) {
+                  throw new Error('require 模块请使用字符串常量, 不要使用变量')
+                }
+              }
+              if (!requirePath) {
+                throw new Error('require 模块请使用字符串常量')
+              }
+
               if (excludeRequire.indexOf(requirePath) < 0) {
                 if (isNpmPkg(requirePath)) {
                   if (excludeNpmPkgs.indexOf(requirePath) < 0) {
@@ -117,7 +131,7 @@ function parseAst (ast, filePath, files, isProduction, npmConfig, buildAdapter =
                     if (buildAdapter === BUILD_TYPES.ALIPAY) {
                       relativeRequirePath = relativeRequirePath.replace(/@/g, '_')
                     }
-                    args[0].value = relativeRequirePath
+                    args.value = relativeRequirePath
                   }
                 } else {
                   let realRequirePath = path.resolve(path.dirname(filePath), requirePath)
@@ -134,7 +148,7 @@ function parseAst (ast, filePath, files, isProduction, npmConfig, buildAdapter =
                     files.push(realRequirePath)
                     recursiveRequire(realRequirePath, files, isProduction, npmConfig, buildAdapter, compileInclude)
                   }
-                  args[0].value = requirePath
+                  args.value = requirePath
                 }
               }
             }

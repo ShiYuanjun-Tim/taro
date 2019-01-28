@@ -66,6 +66,7 @@
   },
   "devDependencies": {
     "@tarojs/taro": "1.2.1",
+    "@tarojs/rnap4wx":"1.2.1",
     "@types/babel-core": "^6.25.5",
     "@types/babel-generator": "^6.25.1",
     "@types/babel-template": "^6.25.0",
@@ -81,6 +82,7 @@
     "tslint": "^5.10.0",
     "tslint-config-prettier": "^1.10.0",
     "tslint-config-standard": "^7.0.0"
+   
   },
   "publishConfig": {
     "access": "public"

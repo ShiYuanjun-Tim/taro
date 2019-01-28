@@ -18,8 +18,7 @@ import imageTransformer, {
   turnRequireLocalImgToBase64Str } from './patchs/imagePatch'
 import scrollViewTransformer from './patchs/scrollViewPatch'
 import { addStyle } from './patchs/utils'
-import {rn2wx} from '@tarojs/taro'
-import rnModuleImportPatch from './patchs/rnModuleImportPatch'
+import { rn2wx } from '@tarojs/taro'
 
 const template = require('babel-template')
 
@@ -190,7 +189,8 @@ export default function transform (options: Options): TransformResult {
     },
     plugins: [
       require('babel-plugin-transform-flow-strip-types'),
-      [require('babel-plugin-transform-define').default, options.env]
+      [require('babel-plugin-transform-define').default, options.env],
+      require('@tarojs/rnap4wx/lib/babel-plugin/replacement-of-RN')
     ].concat(process.env.ESLINT === 'false' ? [] : eslintValidation).concat((process.env.NODE_ENV === 'test') ? [] : require('babel-plugin-remove-dead-code').default)
   }).ast as t.File
   if (options.isNormal) {
@@ -577,7 +577,6 @@ export default function transform (options: Options): TransformResult {
       })
       componentSourceMap.set(source, names)
 
-      rnModuleImportPatch(path);
     }
   })
 

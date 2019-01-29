@@ -176,8 +176,8 @@ function parseAst (ast, filePath, files, isProduction, npmConfig, buildAdapter =
 }
 
 function tryTurnTemplateLiteral (tlPath) {
-  const expressions = tlPath.node
-  const quasis = tlPath.node
+  const expressions = tlPath.node.expressions
+  const quasis = tlPath.node.quasis
   const expLen = expressions.length
   const qLen = quasis.length
   const allStr = []

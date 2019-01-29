@@ -17,6 +17,7 @@ const {
   pocessTypeEnum,
   PROJECT_CONFIG,
   generateEnvList,
+  replaceContentConstants,
   REG_TYPESCRIPT,
   BUILD_TYPES,
   REG_STYLE,
@@ -28,8 +29,17 @@ const defaultBabelConfig = require('../config/babel')
 
 const npmProcess = require('./npm')
 
-const excludeNpmPkgs = ['ReactPropTypes', 'react-native']
-
+const excludeNpmPkgs = ['ReactPropTypes', 'react-native', '@yqb/rnpack', 'react', 'axios']
+// GAI:13
+const skipRemoveRule = [
+  '@yqb/rnframework/lib/token/cashier',
+  '@yqb/rnframework/lib/request/cashier',
+  '@yqb/rnframework/lib/utils/PafAnimation',
+  '@yqb/rnframework/lib/utils/i18n',
+  process.cwd() + '/config/locale',
+  '@yqb/rnframework/lib/decorators/withBusinessParams',
+  '/node_modules/react/'
+]
 const resolvedCache = {}
 const copyedFiles = {}
 
@@ -103,23 +113,28 @@ function parseAst (ast, filePath, files, isProduction, npmConfig, buildAdapter =
       exit (astPath) {
         astPath.traverse({
           CallExpression (astPath) {
-            const node = astPath.node
-            const callee = node.callee
-            if (callee.name === 'require') {
-              const args = node.arguments[0]
-              let requirePath = args.value
+            const callee = astPath.get('callee')
+            if (callee.node.name === 'require') {
+              const args = astPath.get('arguments.0')
+              let requirePath = args.node.value
 
-              if (!t.isStringLiteral(args)) {
-                if (t.isTemplateLiteral(args)) {
-                  if (args.node.expression.length === 0) {
-                    requirePath = args.quasis.map(ele => ele.value.cooked).join('')
+              if (!args.isStringLiteral()) {
+                if (args.isTemplateLiteral()) {
+                  const result = tryTurnTemplateLiteral(args)
+                  if (result.isString) {
+                    requirePath = result.value
                   }
-                } else if (t.isIdentifier(args)) {
-                  throw new Error('require 模块请使用字符串常量, 不要使用变量')
                 }
               }
               if (!requirePath) {
-                throw new Error('require 模块请使用字符串常量')
+                console.log('ERROR', `无法解析模块模块请使用字符串常量 ${generate(astPath.node).code}`)
+                return
+              }
+
+              const requiredSource = path.resolve(path.dirname(filePath), requirePath)
+              if (skipRemoveRule.some(rule => requiredSource.indexOf(rule) >= 0)) {
+                console.log(`skip 解析 ${requiredSource} from ${filePath}`)
+                return
               }
 
               if (excludeRequire.indexOf(requirePath) < 0) {
@@ -131,7 +146,7 @@ function parseAst (ast, filePath, files, isProduction, npmConfig, buildAdapter =
                     if (buildAdapter === BUILD_TYPES.ALIPAY) {
                       relativeRequirePath = relativeRequirePath.replace(/@/g, '_')
                     }
-                    args.value = relativeRequirePath
+                    args.node.value = relativeRequirePath
                   }
                 } else {
                   let realRequirePath = path.resolve(path.dirname(filePath), requirePath)
@@ -148,7 +163,7 @@ function parseAst (ast, filePath, files, isProduction, npmConfig, buildAdapter =
                     files.push(realRequirePath)
                     recursiveRequire(realRequirePath, files, isProduction, npmConfig, buildAdapter, compileInclude)
                   }
-                  args.value = requirePath
+                  args.node.value = requirePath
                 }
               }
             }
@@ -160,8 +175,39 @@ function parseAst (ast, filePath, files, isProduction, npmConfig, buildAdapter =
   return generate(ast).code
 }
 
+function tryTurnTemplateLiteral (tlPath) {
+  const expressions = tlPath.node
+  const quasis = tlPath.node
+  const expLen = expressions.length
+  const qLen = quasis.length
+  const allStr = []
+  for (let i = 0; i < qLen; i++) {
+    allStr.push(quasis[i].value.cooked)
+    if (i < expLen) {
+      if (!t.isStringLiteral(expressions[i])) {
+        return {
+          isString: false,
+          value: allStr.join(''),
+          err: generate(expressions[i]).code
+        }
+      }
+      allStr.push(expressions[i].value)
+    }
+  }
+  return {
+    isString: true,
+    value: allStr.join('')
+  }
+}
+
 async function recursiveRequire (filePath, files, isProduction, npmConfig = {}, buildAdapter, compileInclude = []) {
-  let fileContent = fs.readFileSync(filePath).toString()
+  let fileContent
+  try {
+    fileContent = fs.readFileSync(filePath).toString()
+  } catch (e) {
+    console.log('ERROR', '读取文件失败', filePath)
+    throw e
+  }
   let outputNpmPath
   if (!npmConfig.dir) {
     const cwdRelate2Npm = path.relative(
@@ -185,7 +231,8 @@ async function recursiveRequire (filePath, files, isProduction, npmConfig = {}, 
   try {
     const constantsReplaceList = Object.assign({
       'process.env.TARO_ENV': buildAdapter
-    }, generateEnvList(projectConfig.env || {}))
+    }, generateEnvList(projectConfig.env || {}),
+    replaceContentConstants(projectConfig.defineConstants || {}))
     const transformResult = wxTransformer({
       code: fileContent,
       sourcePath: filePath,

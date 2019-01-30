@@ -529,7 +529,8 @@ export class RenderParser {
               //   t.memberExpression(t.thisExpression(), t.identifier('state'))
               // ))
               if (alternate === blockStatement.node) {
-                throw codeFrameError(parentNode.loc, '不必要的 else 分支，请遵从 ESLint consistent-return: https://eslint.org/docs/rules/consistent-return')
+                throw codeFrameError(parentNode.loc, '不必要的 else 分支，请遵从 ESLint consistent-return: https://eslint.org/docs/rules/consistent-return '+ jsxElementPath.getStatementParent().getSource()
+                )
               } else if (consequent === blockStatement.node) {
                 const parentIfStatement = ifStatement.findParent(p => p.isIfStatement())
                 if (parentIfStatement) {

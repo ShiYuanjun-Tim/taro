@@ -1601,8 +1601,9 @@ function buildDepComponents (componentPathList, buildConfig) {
 
 function getDepStyleList (outputFilePath, buildDepComponentsResult) {
   let depWXSSList = []
-  if (buildDepComponentsResult.length) {
-    depWXSSList = buildDepComponentsResult.map(item => {
+  const filtered = buildDepComponentsResult.filter(f => f != null)
+  if (filtered.length) {
+    depWXSSList = filtered.map(item => {
       let wxss = item.wxss
       wxss = wxss.replace(sourceDir, outputDir)
       wxss = Util.promoteRelativePath(path.relative(outputFilePath, wxss))

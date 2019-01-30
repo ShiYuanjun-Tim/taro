@@ -509,7 +509,7 @@ export default function transform (options: Options): TransformResult {
     ImportDeclaration (path) {
       const source = path.node.source.value
       if (importSources.has(source)) {
-        throw codeFrameError(path.node, '无法在同一文件重复 import 相同的包。')
+        throw codeFrameError(path.node, '无法在同一文件重复 import 相同的包。file:' + options.sourcePath)
       } else {
         importSources.add(source)
       }

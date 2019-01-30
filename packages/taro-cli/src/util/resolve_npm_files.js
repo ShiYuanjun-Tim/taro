@@ -29,16 +29,19 @@ const defaultBabelConfig = require('../config/babel')
 
 const npmProcess = require('./npm')
 
-const excludeNpmPkgs = ['ReactPropTypes', 'react-native', '@yqb/rnpack', 'react', 'axios']
+const excludeNpmPkgs = ['ReactPropTypes', 'react-native', '@yqb/rnpack']
 // GAI:13
 const skipRemoveRule = [
   '@yqb/rnframework/lib/token/cashier',
   '@yqb/rnframework/lib/request/cashier',
   '@yqb/rnframework/lib/utils/PafAnimation',
   '@yqb/rnframework/lib/utils/i18n',
+  '@yqb/rnframework/lib/i18n',
   process.cwd() + '/config/locale',
   '@yqb/rnframework/lib/decorators/withBusinessParams',
-  '/node_modules/react/'
+  // axios库中wx端名确不会有如下代码的使用
+  'node_modules/axios/lib/adapters',
+  /\.(web|ios|android)\.?/
 ]
 const resolvedCache = {}
 const copyedFiles = {}
@@ -132,8 +135,17 @@ function parseAst (ast, filePath, files, isProduction, npmConfig, buildAdapter =
               }
 
               const requiredSource = path.resolve(path.dirname(filePath), requirePath)
-              if (skipRemoveRule.some(rule => requiredSource.indexOf(rule) >= 0)) {
+              if (skipRemoveRule.some(rule => requiredSource.match(rule) !== null)) {
                 console.log(`skip 解析 ${requiredSource} from ${filePath}`)
+                const statementPath = astPath.getStatementParent()
+                if (statementPath.isVariableDeclaration()) {
+                  statementPath.get('declarations.0.init').replaceWith(t.objectExpression([]))
+                } else if (statementPath.isExpressionStatement()) {
+                  statementPath.get('expression.right').replaceWith(t.objectExpression([]))
+                } else {
+                  console.log('ERROR', 'unknown type ')
+                }
+
                 return
               }
 

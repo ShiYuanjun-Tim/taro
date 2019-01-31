@@ -10,6 +10,7 @@ export interface Options {
   isNormal?: boolean,
   env?: object,
   adapter?: Adapters
+  alias?: Object
 }
 
 export const transformOptions: Options = {} as any

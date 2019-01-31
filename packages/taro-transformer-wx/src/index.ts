@@ -15,7 +15,7 @@ import { eslintValidation } from './eslint'
 import imageTransformer, {
   varNameOfModeMap ,
   varNameOfSourceGuard,
-  turnRequireLocalImgToBase64Str } from './patchs/imagePatch'
+  turnRequireLocalImgToBase64Str } from '@tarojs/rnap4wx/lib/patchs/imagePatch'
 import scrollViewTransformer from './patchs/scrollViewPatch'
 import { addStyle } from './patchs/utils'
 import { rn2wx } from '@tarojs/taro'
@@ -166,6 +166,7 @@ export default function transform (options: Options): TransformResult {
     : options.code
   options.env = Object.assign({ 'process.env.TARO_ENV': options.adapter || 'weapp' }, options.env || {})
   setting.sourceCode = code
+  const alias = options.alias || {}
   // babel-traverse 无法生成 Hub
   // 导致 Path#getSource|buildCodeFrameError 都无法直接使用
   // 原因大概是 babylon.parse 没有生成 File 实例导致 scope 和 path 原型上都没有 `file`
@@ -190,7 +191,10 @@ export default function transform (options: Options): TransformResult {
     plugins: [
       require('babel-plugin-transform-flow-strip-types'),
       [require('babel-plugin-transform-define').default, options.env],
-      require('@tarojs/rnap4wx/lib/babel-plugin/replacement-of-RN')
+      [require('@tarojs/rnap4wx/lib/babel-plugin/replacement-of-RN') , {
+        filepath: options.sourcePath,
+        alias
+      }]
     ].concat(process.env.ESLINT === 'false' ? [] : eslintValidation).concat((process.env.NODE_ENV === 'test') ? [] : require('babel-plugin-remove-dead-code').default)
   }).ast as t.File
   if (options.isNormal) {

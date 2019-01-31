@@ -851,6 +851,10 @@ function parseComponentExportAst (ast, componentName, componentPath, componentTy
       }
     }
   })
+  if (!componentRealPath) {
+    console.log('WARN', `组件路径分析失败，使用默认${componentPath}`)
+    componentRealPath = componentPath
+  }
   return componentRealPath
 }
 
@@ -862,7 +866,8 @@ function isFileToBeTaroComponent (code, sourcePath, outputPath) {
     isNormal: true,
     isTyped: Util.REG_TYPESCRIPT.test(sourcePath),
     adapter: buildAdapter,
-    env: constantsReplaceList
+    env: constantsReplaceList,
+    alias: pathAlias
   })
   const { ast } = transformResult
   let isTaroComponent = false
@@ -969,7 +974,8 @@ async function compileScriptFile (content, sourceFilePath, outputFilePath, adapt
     isNormal: true,
     isTyped: false,
     adapter,
-    env: constantsReplaceList
+    env: constantsReplaceList,
+    alias: pathAlias
   })
   const res = parseAst(PARSE_AST_TYPE.NORMAL, transformResult.ast, [], sourceFilePath, outputFilePath)
   return res.code
@@ -1041,7 +1047,8 @@ async function buildEntry () {
       isApp: true,
       isTyped: Util.REG_TYPESCRIPT.test(entryFilePath),
       adapter: buildAdapter,
-      env: constantsReplaceList
+      env: constantsReplaceList,
+      alias: pathAlias
     })
     // GAI:13
     const globalcssImportPath = './global.css'
@@ -1274,7 +1281,8 @@ async function buildSinglePage (page) {
       isRoot: true,
       isTyped: Util.REG_TYPESCRIPT.test(pageJs),
       adapter: buildAdapter,
-      env: constantsReplaceList
+      env: constantsReplaceList,
+      alias: pathAlias
     })
     const pageDepComponents = transformResult.components
     const pageWXMLContent = isProduction ? transformResult.compressedTemplate : transformResult.template
@@ -1641,7 +1649,7 @@ async function buildSingleComponent (componentObj, buildConfig = {}) {
     name: componentObj.name,
     type: componentObj.type
   }
-  const component = componentObj.path
+  let component = componentObj.path
   if (!component) {
     Util.printLog(Util.pocessTypeEnum.ERROR, '组件错误', `组件${_.upperFirst(_.camelCase(componentObj.name))}路径错误，请检查！（可能原因是导出的组件名不正确）`)
     return {
@@ -1664,7 +1672,13 @@ async function buildSingleComponent (componentObj, buildConfig = {}) {
   let outputComponentShowPath = componentShowPath.replace(isComponentFromNodeModules ? NODE_MODULES : sourceDirName, buildConfig.outputDirName || outputDirName)
   outputComponentShowPath = outputComponentShowPath.replace(path.extname(outputComponentShowPath), '')
   Util.printLog(Util.pocessTypeEnum.COMPILE, '组件文件', componentShowPath)
-  const componentContent = fs.readFileSync(component).toString()
+  let componentContent
+  try {
+    componentContent = fs.readFileSync(component).toString()
+  } catch (e) {
+    Util.printLog(Util.pocessTypeEnum.ERROR, '文件不存在', componentShowPath)
+    throw e
+  }
   const outputComponentJSPath = component.replace(sourceDirPath, buildConfig.outputDir || buildOutputDir).replace(path.extname(component), outputFilesTypes.SCRIPT)
   const outputComponentWXMLPath = outputComponentJSPath.replace(path.extname(outputComponentJSPath), outputFilesTypes.TEMPL)
   const outputComponentWXSSPath = outputComponentJSPath.replace(path.extname(outputComponentJSPath), outputFilesTypes.STYLE)
@@ -1710,7 +1724,8 @@ async function buildSingleComponent (componentObj, buildConfig = {}) {
       isTyped: Util.REG_TYPESCRIPT.test(component),
       isNormal: false,
       adapter: buildAdapter,
-      env: constantsReplaceList
+      env: constantsReplaceList,
+      alias: pathAlias
     })
     const componentWXMLContent = isProduction ? transformResult.compressedTemplate : transformResult.template
     const componentDepComponents = transformResult.components
@@ -1861,7 +1876,8 @@ function compileDepScripts (scriptFiles) {
             isNormal: true,
             isTyped: Util.REG_TYPESCRIPT.test(item),
             adapter: buildAdapter,
-            env: constantsReplaceList
+            env: constantsReplaceList,
+            alias: pathAlias
           })
           const ast = transformResult.ast
           const res = parseAst(PARSE_AST_TYPE.NORMAL, ast, [], item, outputItem)

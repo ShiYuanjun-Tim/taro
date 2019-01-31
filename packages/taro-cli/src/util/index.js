@@ -70,8 +70,9 @@ exports.pocessTypeEnum = pocessTypeEnum
 
 exports.CSS_EXT = ['.css', '.scss', '.sass', '.less', '.styl', '.wxss', '.acss']
 exports.SCSS_EXT = ['.scss']
-exports.JS_EXT = ['.js', '.jsx']
-exports.TS_EXT = ['.ts', '.tsx']
+// GAI:14
+exports.JS_EXT = ['.wx.js', '.wx.jsx', '.js', '.jsx']
+exports.TS_EXT = ['.wx.ts', '.wx.tsx', '.ts', '.tsx']
 exports.REG_JS = /\.js(\?.*)?$/
 exports.REG_SCRIPT = /\.(js|jsx)(\?.*)?$/
 exports.REG_TYPESCRIPT = /\.(tsx|ts)(\?.*)?$/
@@ -354,7 +355,7 @@ exports.urlJoin = function () {
 
 exports.resolveScriptPath = function (p) {
   let realPath = p
-  const SCRIPT_EXT = exports.JS_EXT.concat(exports.TS_EXT)
+  const SCRIPT_EXT = exports.JS_EXT.concat(exports.TS_EXT).sort((a, b) => b.length - a.length)
   for (let i = 0; i < SCRIPT_EXT.length; i++) {
     const item = SCRIPT_EXT[i]
     if (fs.existsSync(`${p}${item}`)) {

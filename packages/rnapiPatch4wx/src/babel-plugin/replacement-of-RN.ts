@@ -1,7 +1,7 @@
 import { NodePath } from 'babel-traverse'
 import * as t from 'babel-types'
 // import generate from 'babel-generator'
-
+import {turnRequireLocalImgToBase64Str} from "../patchs/imagePatch"
 declare const exports:any;
 declare const module:any;
 
@@ -86,7 +86,7 @@ exports.default = function() {
         }
       
       },
-      CallExpression (path) {
+      CallExpression (path , state) {
         const callee = path.get('callee')
        
         if (callee.isIdentifier({ name: 'require' })) {
@@ -97,7 +97,17 @@ exports.default = function() {
           //  const p =path.getStatementParent().getStatementParent()
           //  const code = p&& p.getSource()
           //   debugger
+          } else {// img require repalce
+            const conf = state.opts;
+            if(conf.filepath) {
+              const base64 = turnRequireLocalImgToBase64Str(path, conf.filepath, conf.alias)
+              if (base64) {
+                path.replaceWith(base64)
+              }
+            }
           }
+
+
         }
       }
     },

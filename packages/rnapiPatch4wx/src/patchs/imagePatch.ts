@@ -2,7 +2,21 @@ import * as t from 'babel-types'
 import { NodePath } from 'babel-traverse'
 import * as fs from 'fs'
 import * as pathM from 'path'
-import { rn2wx } from '@tarojs/taro'
+
+const rn2wx = {
+  modeMapping: {
+    cover: 'aspectFill',
+    contain: 'aspectFit',
+    stretch: 'scaleToFill',
+    repeat: 'scaleToFill',
+    center: 'aspectFit'
+  },
+  varNames: {
+    sourceGuardFun: 'runtimeGuard',
+    modeMapping: 'modeMapping'
+  }
+
+}
 
 export const varNameOfModeMap = '_modeMapping_' // 这个是在weapp模块导出的变量名
 
@@ -122,19 +136,39 @@ export function sourceAttr2src (path: NodePath<t.JSXAttribute>, sourcePath: stri
  * @param requireCallExprPath
  * @param sourcePath
  */
-export function turnRequireLocalImgToBase64Str (requireCallExprPath: NodePath<t.CallExpression>, sourcePath: string): t.StringLiteral | null {
+export function turnRequireLocalImgToBase64Str (requireCallExprPath: NodePath<t.CallExpression>, sourcePath: string, alias:object ={}): t.StringLiteral | null {
   const srcVal = requireCallExprPath.get('arguments.0').node
   if (t.isStringLiteral(srcVal)) {
     // 本地图片base64编码
-    const ext = pathM.extname(srcVal.value).substr(1)
+    const rawPath = srcVal.value
+    const ext = pathM.extname(rawPath).substr(1)
     if (IMG_SUPPORT.test(ext)) {
-      const imgPath = pathM.isAbsolute(srcVal.value) ? srcVal.value : pathM.join(
-        pathM.dirname(sourcePath),
-        srcVal.value
-      )
-      const base64img = fs.readFileSync(imgPath).toString('base64')
+      let imgPath = null
+      if(pathM.isAbsolute(rawPath)) {
+        imgPath = rawPath
+      } else if(rawPath.startsWith('.')){
+        imgPath = pathM.join(
+          pathM.dirname(sourcePath),
+          rawPath
+        )
+      } else if (
+        isNpmPkg(rawPath)
+        && rawPath.split('/')[0] in alias
+      ) {
+        const prefix = rawPath.split('/')[0]
+        imgPath = pathM.join(alias[prefix] ,rawPath.replace(new RegExp(prefix+'/?'),'')) 
+      }
+      if(!imgPath)return null;
+       const base64img = fs.readFileSync(imgPath).toString('base64')
       return t.stringLiteral(`data:image/${ext};base64,${base64img}`)
     }
   }
   return null
+}
+
+function isNpmPkg (name) {
+  if (/^(\.|\/)/.test(name)) {
+    return false
+  }
+  return true
 }

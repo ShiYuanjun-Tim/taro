@@ -51,6 +51,7 @@ const configDir = path.join(basedir, PROJECT_CONFIG)
 const projectConfig = require(configDir)(_.merge)
 const pluginsConfig = projectConfig.plugins || {}
 const outputDirName = projectConfig.outputRoot || CONFIG.OUTPUT_DIR
+const pathAlias = projectConfig.alias || {}
 
 const babelConfig = _.mergeWith(defaultBabelConfig, pluginsConfig.babel, (objValue, srcValue) => {
   if (Array.isArray(objValue)) {
@@ -252,7 +253,8 @@ async function recursiveRequire (filePath, files, isProduction, npmConfig = {}, 
       isNormal: true,
       adapter: buildAdapter,
       isTyped: REG_TYPESCRIPT.test(filePath),
-      env: constantsReplaceList
+      env: constantsReplaceList,
+      alias: pathAlias
     })
     const ast = babel.transformFromAst(transformResult.ast, '', {
       plugins: [

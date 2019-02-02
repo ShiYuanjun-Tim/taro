@@ -289,11 +289,11 @@ function initComponent (ComponentClass, isPage) {
   updateComponent(this.$component)
 }
 
-function createComponent (ComponentClass, isPage) {
+function createComponent (ComponentClass, isPage, initProps = {}) {
   let initData = {
     _componentProps: 1
   }
-  const componentProps = filterProps({}, ComponentClass.defaultProps)
+  const componentProps = filterProps({}, ComponentClass.defaultProps, initProps)
   const componentInstance = new ComponentClass(componentProps)
   componentInstance._constructor && componentInstance._constructor(componentProps)
   try {

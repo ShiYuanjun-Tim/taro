@@ -60,6 +60,10 @@ const notExistNpmList = []
 const taroJsFramework = '@tarojs/taro'
 const taroJsComponents = '@tarojs/components'
 const taroJsRedux = '@tarojs/redux'
+
+const eflow = 'react-eflow'
+const replaceofeflow = '@tarojs/rnap4wx/lib/patchs/eflow/wrapComponent.wx.js'
+
 let appConfig = {}
 const dependencyTree = {}
 const depComponents = {}
@@ -433,6 +437,48 @@ function parseAst (type, ast, depComponents, sourceFilePath, filePath, npmSkip =
               source.value = getExactedNpmFilePath(value, filePath)
             } else {
               source.value = value
+            }
+          }
+
+          if (value === eflow) {
+            // GAI:15
+            // 找到是否导入了eflow的wrapComponent
+            const wrapComponentPath = astPath.get('specifiers').find(spe => spe.isImportSpecifier() && spe.get('imported').isIdentifier({name: 'wrapComponent'}))
+            if (wrapComponentPath) {
+              const wrapComponentFunLocalname = wrapComponentPath.node.local.name
+              // 找寻使用处
+              const usedRefs = astPath.scope.getBinding(wrapComponentFunLocalname)
+              if (usedRefs.referenced) {
+                usedRefs.referencePaths.forEach(refPath => {
+                  const callExpPath = refPath.findParent(parent => parent.isCallExpression())
+                  if (callExpPath) {
+                    const nameOfCompClz = callExpPath.get('arguments.0').node.name
+                    // 查询到包装组件名CC后  该语句前 重新给CC赋值成wrap后的内容 并把CC替换当前call语句
+                    const statementPath = callExpPath.getStatementParent()
+                    const reAssignToClz = template(`CLZ = CALLEXP`)({
+                      CLZ: t.identifier(nameOfCompClz),
+                      CALLEXP: callExpPath.node
+                    })
+                    statementPath.insertBefore(reAssignToClz)
+                    callExpPath.replaceWith(t.identifier(nameOfCompClz))
+                  }
+                })
+              }
+
+              // 用新的文件替换导入
+              const newImportAst = template(`
+              var WRAP_FUN_NAME = require(NEW_WRAP_SOURCE).default
+            `)({
+                WRAP_FUN_NAME: t.identifier(wrapComponentFunLocalname),
+                NEW_WRAP_SOURCE: t.stringLiteral(replaceofeflow)
+              })
+              astPath.insertAfter(newImportAst)
+              // 删除 原本eflow的导入语句
+              if (specifiers.length === 1) {
+                astPath.remove()
+              } else {
+                wrapComponentPath.remove()
+              }
             }
           }
         }

@@ -21,7 +21,8 @@ const {
   REG_TYPESCRIPT,
   BUILD_TYPES,
   REG_STYLE,
-  recursiveFindNodeModules
+  recursiveFindNodeModules,
+  resolveScriptPath
 } = require('./index')
 
 const CONFIG = require('../config')
@@ -161,9 +162,20 @@ function parseAst (ast, filePath, files, isProduction, npmConfig, buildAdapter =
                     }
                     args.node.value = relativeRequirePath
                   }
-                } else {
+                } else { // GAI:14
                   let realRequirePath = path.resolve(path.dirname(filePath), requirePath)
-                  let tempPathWithJS = `${realRequirePath}.js`
+                  const resolvedFilePath = resolveScriptPath(realRequirePath)
+                  if (fs.existsSync(resolvedFilePath)) {
+                    realRequirePath = resolvedFilePath
+                    requirePath = requirePath.replace(path.basename(requirePath), path.basename(resolvedFilePath))
+                  } else {
+                    const msg = `路径解析失败请查看文件${filePath}中引用：${realRequirePath}\n => ${resolvedFilePath}`
+                    console.log('ERROR', msg)
+                    throw new Error(msg)
+                  }
+
+                  /*  路径解析 被上面方法 resolveScriptPath 替换
+                   let tempPathWithJS = `${realRequirePath}.js`
                   let tempPathWithIndexJS = `${realRequirePath}${path.sep}index.js`
                   if (fs.existsSync(tempPathWithJS)) {
                     realRequirePath = tempPathWithJS
@@ -171,7 +183,8 @@ function parseAst (ast, filePath, files, isProduction, npmConfig, buildAdapter =
                   } else if (fs.existsSync(tempPathWithIndexJS)) {
                     realRequirePath = tempPathWithIndexJS
                     requirePath += '/index.js'
-                  }
+                  } */
+
                   if (files.indexOf(realRequirePath) < 0) {
                     files.push(realRequirePath)
                     recursiveRequire(realRequirePath, files, isProduction, npmConfig, buildAdapter, compileInclude)

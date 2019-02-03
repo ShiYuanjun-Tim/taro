@@ -294,7 +294,9 @@ function createComponent (ComponentClass, isPage, initProps = {}) {
     _componentProps: 1
   }
   const componentProps = filterProps({}, ComponentClass.defaultProps, initProps)
+  componentProps._transient_ = true // 标明此对象是个用完就丢的东西
   const componentInstance = new ComponentClass(componentProps)
+  delete componentProps._transient_
   componentInstance._constructor && componentInstance._constructor(componentProps)
   try {
     componentInstance.state = componentInstance._createData() || componentInstance.state

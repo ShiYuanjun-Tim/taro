@@ -73,14 +73,21 @@ const wrapComponent = function (_Component, updaters, customPropsMapping) {
       constructor (props) {
         super(props)
         this._eflowstate = {}
+        const _transient_ = props && props._transient_
+        const initEflowData = this._bindUpdater()
+        this.props = Object.assign(this.props, initEflowData)
+        if (_transient_) {
+          // 代表只是个瞬时对象不会被真实装载，只用于获取数据 之后的事件监听需要注销
+          this._off()
+        }
       }
 
       componentWillMount () {
         super.componentWillMount && super.componentWillMount()
         console.log('DataPool.componentWillMount')
         // 这里不在构造函数中初始化时因为 只有明确被加载组件数据才有监听价格， 防止多次实例化却不使用的问题
-        const initEflowData = this._bindUpdater()
-        this.props = Object.assign(this.props, initEflowData)
+        // const initEflowData = this._bindUpdater()
+        // this.props = Object.assign(this.props, initEflowData)
       }
       componentWillUnmount () {
         super.componentWillUnmount && super.componentWillUnmount()

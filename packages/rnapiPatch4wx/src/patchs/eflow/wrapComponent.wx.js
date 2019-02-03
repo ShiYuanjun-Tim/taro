@@ -76,14 +76,14 @@ const wrapComponent = function (_Component, updaters, customPropsMapping) {
       }
 
       componentWillMount () {
-        super.componentWillMount()
+        super.componentWillMount && super.componentWillMount()
         console.log('DataPool.componentWillMount')
         // 这里不在构造函数中初始化时因为 只有明确被加载组件数据才有监听价格， 防止多次实例化却不使用的问题
         const initEflowData = this._bindUpdater()
         this.props = Object.assign(this.props, initEflowData)
       }
       componentWillUnmount () {
-        super.componentWillUnmount()
+        super.componentWillUnmount && super.componentWillUnmount()
         this._off()
       }
 
@@ -95,11 +95,11 @@ const wrapComponent = function (_Component, updaters, customPropsMapping) {
         let store
         let state = this._eflowstate
         if (updaters && updaters.length) {
-          let isMethod;
-          let propsKey;
-          let _eflowKey;
-          let updater;
-          let originUpdater;
+          let isMethod
+          let propsKey
+          let _eflowKey
+          let updater
+          let originUpdater
           // 遍历updaters, 处理updater的绑定事件
           for (let i = 0; i < updaters.length; i++) {
             updater = updaters[i]
@@ -146,8 +146,8 @@ const wrapComponent = function (_Component, updaters, customPropsMapping) {
        * */
       _off () {
         if (updaters && updaters.length) {
-          let event = this.eflowEvent,
-            _eflowKey
+          let event = this.eflowEvent
+          let _eflowKey
           updaters.forEach(function (updater) {
             updater = isFunction(updater) ? updater : updater.updater
             _eflowKey = updater._eflowKey
@@ -157,13 +157,12 @@ const wrapComponent = function (_Component, updaters, customPropsMapping) {
         }
       }
 
-      // _createData(state,props) {
-      //   debugger
-      //   // const eflowState = this._getProps()
-      //   const __props = arguments[1] || this.props || {};
+      _createData (state, props) {
+        // const eflowState = this._getProps()
+        const __props = arguments[1] || this.props || {}
 
-      //   return super._createData(state,Object.assign({},__props ))
-      // }
+        return super._createData(state, Object.assign({}, __props, this._eflowstate))
+      }
     }
 
     return DataPool

@@ -10,6 +10,9 @@ const isDEV = typeof process === 'undefined' ||
   !process.env ||
   process.env.NODE_ENV !== 'production'
 
+function clone (obj) {
+  return JSON.parse(JSON.stringify(obj))
+}
 const privatePropKeyName = '_triggerObserer'
 export function updateComponent (component) {
   const { props, __propTypes } = component
@@ -17,7 +20,7 @@ export function updateComponent (component) {
     const componentName = component.constructor.name || component.constructor.toString().match(/^function\s*([^\s(]+)/)[1]
     PropTypes.checkPropTypes(__propTypes, props, 'prop', componentName)
   }
-  const prevProps = component.prevProps || props
+  const prevProps = component.prevProps || clone(props)
   component.props = prevProps
   if (component.__mounted && component._unsafeCallUpdate === true && component.componentWillReceiveProps) {
     component._disable = true
@@ -53,8 +56,8 @@ export function updateComponent (component) {
   if (!skip) {
     doUpdate(component, prevProps, prevState)
   }
-  component.prevProps = component.props
-  component.prevState = component.state
+  component.prevProps = clone(component.props)
+  component.prevState = clone(component.state)
 }
 
 function doUpdate (component, prevProps, prevState) {

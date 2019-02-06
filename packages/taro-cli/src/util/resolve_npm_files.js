@@ -167,7 +167,13 @@ function parseAst (ast, filePath, files, isProduction, npmConfig, buildAdapter =
                   const resolvedFilePath = resolveScriptPath(realRequirePath)
                   if (fs.existsSync(resolvedFilePath)) {
                     realRequirePath = resolvedFilePath
-                    requirePath = requirePath.replace(path.basename(requirePath), path.basename(resolvedFilePath))
+
+                    const basePart = '/' + path.basename(requirePath)
+                    const repalcePosition = resolvedFilePath.indexOf(basePart)
+                    if (repalcePosition < 0) {
+                      throw new Error('解析required路径有错，请查看代码')
+                    }
+                    requirePath = requirePath.replace(basePart, resolvedFilePath.substr(repalcePosition))
                   } else {
                     const msg = `路径解析失败请查看文件${filePath}中引用：${realRequirePath}\n => ${resolvedFilePath}`
                     console.log('ERROR', msg)

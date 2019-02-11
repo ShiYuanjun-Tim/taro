@@ -80,11 +80,14 @@ function _appendStyleToArrayOrObject (
   if (path.isArrayExpression()) {
     const funname = appendToHead ? 'unshiftContainer' : 'pushContainer';
     (path as any)[funname]('elements', additonalStyObjExp)
-  } else if (path.isObjectExpression()) {
+  } else if (path.isObjectExpression()
+    || path.isIdentifier()
+    || path.isMemberExpression()
+  ) {
     const styleArr = [path.node as t.Expression, additonalStyObjExp]
     const newsStyleNode = t.arrayExpression(appendToHead ? styleArr.reverse() : styleArr)
     path.replaceWith(newsStyleNode)
   } else {
-    throw new Error('error typeof path')
+    throw new Error('style样式表达式，未找到处理方案')
   }
 }

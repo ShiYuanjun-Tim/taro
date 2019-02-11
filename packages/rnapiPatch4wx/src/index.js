@@ -4,13 +4,18 @@ import Dimensions from './api/Dimensions'
 import PixelRatio from './api/PixelRatio'
 import Platform from './api/Platform'
 import StyleSheet from './api/StyleSheet'
+import NativeEventEmitter from './api/NativeEventEmitter'
+
+const NativeAppEventEmitter = new NativeEventEmitter()
 
 export {
   DeviceInfo,
   Dimensions,
   PixelRatio,
   Platform,
-  StyleSheet
+  StyleSheet,
+  NativeEventEmitter,
+  NativeAppEventEmitter
 }
 
 const ReactNative = {
@@ -18,7 +23,9 @@ const ReactNative = {
   Dimensions,
   PixelRatio,
   Platform,
-  StyleSheet
+  StyleSheet,
+  NativeEventEmitter,
+  NativeAppEventEmitter
 }
 
 export default ReactNative

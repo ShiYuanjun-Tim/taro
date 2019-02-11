@@ -37,7 +37,9 @@ const skipRemoveRule = [
   '@yqb/rnframework/lib/request/cashier',
   '@yqb/rnframework/lib/utils/PafAnimation',
   '@yqb/rnframework/lib/utils/i18n',
+  '@yqb/rnframework/lib/utils/web',
   '@yqb/rnframework/lib/i18n',
+
   process.cwd() + '/config/locale',
   '@yqb/rnframework/lib/decorators/withBusinessParams',
   // axios库中wx端名确不会有如下代码的使用
@@ -169,11 +171,11 @@ function parseAst (ast, filePath, files, isProduction, npmConfig, buildAdapter =
                     realRequirePath = resolvedFilePath
 
                     const basePart = '/' + path.basename(requirePath)
-                    const repalcePosition = resolvedFilePath.indexOf(basePart)
+                    const repalcePosition = resolvedFilePath.lastIndexOf(basePart)
                     if (repalcePosition < 0) {
                       throw new Error('解析required路径有错，请查看代码')
                     }
-                    requirePath = requirePath.replace(basePart, resolvedFilePath.substr(repalcePosition))
+                    requirePath = requirePath.replace(new RegExp(basePart + '$'), resolvedFilePath.substr(repalcePosition))
                   } else {
                     const msg = `路径解析失败请查看文件${filePath}中引用：${realRequirePath}\n => ${resolvedFilePath}`
                     console.log('ERROR', msg)

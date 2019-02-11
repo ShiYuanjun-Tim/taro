@@ -283,7 +283,7 @@ function initComponent (ComponentClass, isPage) {
   // 小程序组件ready，但是数据并没有ready，需要通过updateComponent来初始化数据，setData完成之后才是真正意义上的组件ready
   // 动态组件执行改造函数副本的时,在初始化数据前计算好props
   if (!isPage) {
-    const nextProps = filterProps(ComponentClass.properties, ComponentClass.defaultProps, this.$component.props, this.data)
+    const nextProps = filterProps(ComponentClass.properties, ComponentClass.defaultProps, this.$component.props, Object.assign(this.data, this.$component._eflowstate || {}))
     this.$component.props = nextProps
   }
   updateComponent(this.$component)

@@ -78,8 +78,13 @@ function _appendStyleToArrayOrObject (
   appendToHead: boolean
 ) {
   if (path.isArrayExpression()) {
-    const funname = appendToHead ? 'unshiftContainer' : 'pushContainer';
-    (path as any)[funname]('elements', additonalStyObjExp)
+
+    if (appendToHead) {
+      path.node.elements.unshift(additonalStyObjExp)
+    } else {
+      path.node.elements.push(additonalStyObjExp)
+    }
+
   } else if (path.isObjectExpression()
     || path.isIdentifier()
     || path.isMemberExpression()

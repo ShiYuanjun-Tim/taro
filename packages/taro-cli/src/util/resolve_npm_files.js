@@ -39,9 +39,10 @@ const skipRemoveRule = [
   '@yqb/rnframework/lib/utils/i18n',
   '@yqb/rnframework/lib/utils/web',
   '@yqb/rnframework/lib/i18n',
+  '@yqb/rnframework/lib/decorators/withBusinessParams',
 
   process.cwd() + '/config/locale',
-  '@yqb/rnframework/lib/decorators/withBusinessParams',
+
   // axios库中wx端名确不会有如下代码的使用
   'node_modules/axios/lib/adapters',
   /\.(web|ios|android)\.?/

@@ -554,6 +554,7 @@ exports.UPDATE_PACKAGE_LIST = [
   '@tarojs/taro-h5',
   '@tarojs/taro-swan',
   '@tarojs/taro-alipay',
+  '@tarojs/taro-tt',
   '@tarojs/plugin-babel',
   '@tarojs/plugin-csso',
   '@tarojs/plugin-sass',
@@ -583,3 +584,14 @@ exports.UPDATE_PACKAGE_LIST = [
 ]
 
 exports.pascalCase = (str) => str.charAt(0).toUpperCase() + _.camelCase(str.substr(1))
+
+exports.getInstalledNpmPkgVersion = function (pkgName, basedir) {
+  const resolvePath = require('resolve')
+  try {
+    const pkg = resolvePath.sync(`${pkgName}/package.json`, { basedir })
+    const pkgJson = fs.readJSONSync(pkg)
+    return pkgJson.version
+  } catch (err) {
+    return null
+  }
+}

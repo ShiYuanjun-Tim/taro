@@ -9,6 +9,7 @@ const anonymousFnNamePreffix = 'funPrivate'
 const componentFnReg = /^__fn_/
 const routerParamsPrivateKey = '__key_'
 const preloadPrivateKey = '__preload_'
+const PRELOAD_DATA_KEY = 'preload'
 const preloadInitedComponent = '$preloadComponent'
 const pageExtraFns = ['onPullDownRefresh', 'onReachBottom', 'onShareAppMessage', 'onPageScroll', 'onTabItemTap', 'onResize']
 
@@ -123,10 +124,11 @@ function processEvent (eventHandlerName, obj) {
       if (/^e/.test(keyLower)) {
         // 小程序属性里中划线后跟一个下划线会解析成不同的结果
         keyLower = keyLower.replace(/^e/, '')
-        keyLower = keyLower.toLocaleLowerCase()
         if (keyLower.indexOf(eventType) >= 0) {
           const argName = keyLower.replace(eventType, '')
-          bindArgs[argName] = dataset[key]
+          if (/^(a[a-z]|so)$/.test(argName)) {
+            bindArgs[argName] = dataset[key]
+          }
         }
       }
     })
@@ -249,6 +251,12 @@ export function componentTrigger (component, key, args) {
     }
   }
 
+  component[key] && typeof component[key] === 'function' && component[key].call(component, ...args)
+  if (key === 'componentWillMount') {
+    component._dirty = false
+    component._disable = false
+    component.state = component.getState()
+  }
   if (key === 'componentWillUnmount') {
     component._dirty = true
     component._disable = true
@@ -258,14 +266,6 @@ export function componentTrigger (component, key, args) {
     }
     component._pendingStates = []
     component._pendingCallbacks = []
-  }
-  component[key] && typeof component[key] === 'function' && component[key].call(component, ...args)
-  if (key === 'componentWillMount') {
-    component._dirty = false
-    component._disable = false
-    component.state = component.getState()
-  }
-  if (key === 'componentWillUnmount') {
     // refs
     if (component['$$refs'] && component['$$refs'].length > 0) {
       component['$$refs'].forEach(ref => typeof ref['fn'] === 'function' && ref['fn'].call(component, null))
@@ -285,6 +285,8 @@ function initComponent (ComponentClass, isPage) {
   if (!isPage) {
     const nextProps = filterProps(ComponentClass.properties, ComponentClass.defaultProps, this.$component.props, this.data)
     this.$component.props = nextProps
+  } else {
+    this.$component.$router.path = getCurrentPageUrl()
   }
   updateComponent(this.$component)
 }
@@ -333,6 +335,10 @@ function createComponent (ComponentClass, isPage) {
           // 直接启动，非内部跳转
           params = filterParams(this.data, ComponentClass.defaultParams)
         }
+        if (cacheDataHas(PRELOAD_DATA_KEY)) {
+          const data = cacheDataGet(PRELOAD_DATA_KEY, true)
+          this.$component.$router.preload = data
+        }
         Object.assign(this.$component.$router.params, params)
         // preload
         if (cacheDataHas(this.data[preloadPrivateKey])) {
@@ -360,7 +366,6 @@ function createComponent (ComponentClass, isPage) {
     weappComponentConf.methods['onLoad'] = function (options = {}) {
       if (this.$component.__isReady) return
       Object.assign(this.$component.$router.params, options)
-      this.$component.$router.path = getCurrentPageUrl()
       initComponent.apply(this, [ComponentClass, isPage])
     }
     weappComponentConf.methods['onReady'] = function () {

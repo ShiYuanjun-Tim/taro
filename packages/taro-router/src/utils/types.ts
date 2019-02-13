@@ -20,7 +20,12 @@ export interface RouteObj {
   path: Path;
   componentLoader: ComponentLoader;
   isIndex: boolean;
+  isRedirect: boolean;
   key?: string;
+}
+
+export interface CustomRoutes {
+  [key: string]: string;
 }
 
 export type Action = 'POP' | 'PUSH' | 'REPLACE'

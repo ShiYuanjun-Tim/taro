@@ -179,7 +179,7 @@ function analyzeImportUrl ({ astPath, value, depComponents, sourceFilePath, file
       if (Util.REG_SCRIPT.test(valueExtname) || Util.REG_TYPESCRIPT.test(valueExtname)) {
         const vpath = path.resolve(sourceFilePath, '..', value)
         let fPath = value
-        if (fs.existsSync(vpath) && !NODE_MODULES_REG.test(vpath)) {
+        if (fs.existsSync(vpath) && vpath !== sourceFilePath) {
           fPath = vpath
         }
         if (scriptFiles.indexOf(fPath) < 0) {
@@ -448,7 +448,11 @@ function parseAst (type, ast, depComponents, sourceFilePath, filePath, npmSkip =
         const objectPropperties = []
         for (const key in tokens) {
           if (tokens.hasOwnProperty(key)) {
-            objectPropperties.push(t.objectProperty(t.identifier(key), t.stringLiteral(tokens[key])))
+            let keyPath = key
+            if (key.indexOf('-') >= 0) {
+              keyPath = `'${key}'`
+            }
+            objectPropperties.push(t.objectProperty(t.identifier(keyPath), t.stringLiteral(tokens[key])))
           }
         }
         let defaultDeclator = null
@@ -687,7 +691,7 @@ function parseAst (type, ast, depComponents, sourceFilePath, filePath, npmSkip =
                   } else if (Util.REG_SCRIPT.test(valueExtname) || Util.REG_TYPESCRIPT.test(valueExtname)) {
                     const vpath = path.resolve(sourceFilePath, '..', value)
                     let fPath = value
-                    if (fs.existsSync(vpath) && !NODE_MODULES_REG.test(vpath)) {
+                    if (fs.existsSync(vpath) && vpath !== sourceFilePath) {
                       fPath = vpath
                     }
                     if (scriptFiles.indexOf(fPath) < 0) {
@@ -937,6 +941,9 @@ function copyFilesFromSrcToOutput (files) {
       Util.printLog(Util.pocessTypeEnum.ERROR, '文件', `${modifySrc} 不存在`)
     } else {
       fs.ensureDir(path.dirname(outputFilePath))
+      if (file === outputFilePath) {
+        return
+      }
       fs.copySync(file, outputFilePath)
     }
   })
@@ -975,6 +982,21 @@ async function compileScriptFile (content, sourceFilePath, outputFilePath, adapt
   return res.code
 }
 
+async function checkCliAndFrameworkVersion () {
+  const frameworkName = `@tarojs/taro-${buildAdapter}`
+  const frameworkVersion = Util.getInstalledNpmPkgVersion(frameworkName, nodeModulesPath)
+  if (frameworkVersion) {
+    if (frameworkVersion !== Util.getPkgVersion()) {
+      Util.printLog(Util.pocessTypeEnum.ERROR, '版本问题', `Taro CLI 与本地安装的小程序框架 ${frameworkName} 版本不一致，请确保一致`)
+      console.log(`Taro CLI: ${Util.getPkgVersion()}`)
+      console.log(`${frameworkName}: ${frameworkVersion}`)
+      process.exit(1)
+    }
+  } else {
+    Util.printLog(Util.pocessTypeEnum.WARNING, '依赖安装', chalk.red(`项目依赖 ${frameworkName} 未安装，或安装有误！`))
+  }
+}
+
 function buildProjectConfig () {
   let projectConfigFileName = `project.${buildAdapter}.json`
   if (buildAdapter === Util.BUILD_TYPES.WEAPP) {
@@ -994,6 +1016,30 @@ function buildProjectConfig () {
     JSON.stringify(Object.assign({}, origProjectConfig, { miniprogramRoot: './' }), null, 2)
   )
   Util.printLog(Util.pocessTypeEnum.GENERATE, '工具配置', `${outputDirName}/${projectConfigFileName}`)
+}
+
+async function buildFrameworkInfo () {
+  // 百度小程序编译出 .frameworkinfo 文件
+  if (buildAdapter === Util.BUILD_TYPES.SWAN) {
+    const frameworkInfoFileName = '.frameworkinfo'
+    const frameworkName = `@tarojs/taro-${buildAdapter}`
+    const frameworkVersion = Util.getInstalledNpmPkgVersion(frameworkName, nodeModulesPath)
+    if (frameworkVersion) {
+      const frameworkinfo = {
+        toolName: 'Taro',
+        toolCliVersion: Util.getPkgVersion(),
+        toolFrameworkVersion: frameworkVersion,
+        createTime: new Date(projectConfig.date).getTime()
+      }
+      fs.writeFileSync(
+        path.join(outputDir, frameworkInfoFileName),
+        JSON.stringify(frameworkinfo, null, 2)
+      )
+      Util.printLog(Util.pocessTypeEnum.GENERATE, '框架信息', `${outputDirName}/${frameworkInfoFileName}`)
+    } else {
+      Util.printLog(Util.pocessTypeEnum.WARNING, '依赖安装', chalk.red(`项目依赖 ${frameworkName} 未安装，或安装有误！`))
+    }
+  }
 }
 
 function buildWorkers (worker) {
@@ -1028,6 +1074,15 @@ function buildWorkers (worker) {
     })
   }
   fileRecursiveSearch(workerDir)
+}
+
+async function buildCustomTabbar () {
+  const customTabbarPath = path.join(sourceDir, 'custom-tab-bar')
+  const customTabbarJSPath = Util.resolveScriptPath(customTabbarPath)
+  await buildSingleComponent({
+    path: customTabbarJSPath,
+    name: 'custom-tab-bar'
+  })
 }
 
 async function buildEntry () {
@@ -1068,6 +1123,9 @@ async function buildEntry () {
     }
     if (res.configObj.workers) {
       buildWorkers(res.configObj.workers)
+    }
+    if (res.configObj.tabBar && res.configObj.tabBar.custom) {
+      await buildCustomTabbar()
     }
     const fileDep = dependencyTree[entryFilePath] || {}
     // 编译依赖的脚本文件
@@ -1175,7 +1233,13 @@ function transfromNativeComponents (configFile, componentConfig) {
   const usingComponents = componentConfig.usingComponents
   if (usingComponents && !Util.isEmptyObject(usingComponents)) {
     Object.keys(usingComponents).map(async item => {
-      const componentPath = usingComponents[item]
+      let componentPath = usingComponents[item]
+
+      if (Util.isAliasPath(componentPath, pathAlias)) {
+        componentPath = Util.replaceAliasPath(configFile, componentPath, pathAlias)
+        usingComponents[item] = componentPath
+      }
+
       if (/^plugin:\/\//.test(componentPath)) {
         // 小程序 plugin
         Util.printLog(Util.pocessTypeEnum.REFERENCE, '插件引用', `使用了插件 ${chalk.bold(componentPath)}`)
@@ -1270,7 +1334,8 @@ async function buildSinglePage (page) {
       env: constantsReplaceList
     })
     const pageDepComponents = transformResult.components
-    const pageWXMLContent = isProduction ? transformResult.compressedTemplate : transformResult.template
+    const compressTemplate = useCompileConf.compressTemplate
+    const pageWXMLContent = (isProduction && compressTemplate) ? transformResult.compressedTemplate : transformResult.template
     const res = parseAst(PARSE_AST_TYPE.PAGE, transformResult.ast, pageDepComponents, pageJs, outputPageJSPath)
     let resCode = res.code
     resCode = await compileScriptFile(resCode, pageJs, outputPageJSPath, buildAdapter)
@@ -1525,7 +1590,8 @@ function compileDepStyles (outputFilePath, styleFiles, isComponent) {
         let newStylePath = stylePath
         newStylePath = stylePath.replace('~', '')
         const npmInfo = resolveNpmFilesPath(newStylePath, isProduction, weappNpmConfig, buildAdapter, appPath, compileInclude)
-        return str.replace(stylePath, npmInfo.main)
+        const importRelativePath = Util.promoteRelativePath(path.relative(filePath, npmInfo.main))
+        return str.replace(stylePath, importRelativePath)
       }
       return str
     })
@@ -1704,7 +1770,8 @@ async function buildSingleComponent (componentObj, buildConfig = {}) {
       adapter: buildAdapter,
       env: constantsReplaceList
     })
-    const componentWXMLContent = isProduction ? transformResult.compressedTemplate : transformResult.template
+    const compressTemplate = useCompileConf.compressTemplate
+    const componentWXMLContent = (isProduction && compressTemplate) ? transformResult.compressedTemplate : transformResult.template
     const componentDepComponents = transformResult.components
     const res = parseAst(PARSE_AST_TYPE.COMPONENT, transformResult.ast, componentDepComponents, component, outputComponentJSPath, buildConfig.npmSkip)
     let resCode = res.code
@@ -1834,7 +1901,7 @@ function compileDepScripts (scriptFiles) {
       const compileExclude = useCompileConf.exclude || []
       let isInCompileExclude = false
       compileExclude.forEach(excludeItem => {
-        if (path.join(appPath, excludeItem) === item) {
+        if (item.indexOf(path.join(appPath, excludeItem)) >= 0) {
           isInCompileExclude = true
         }
       })
@@ -1906,7 +1973,13 @@ function copyFileSync (from, to, options) {
   const filename = path.basename(from)
   if (fs.statSync(from).isFile() && !path.extname(to)) {
     fs.ensureDir(to)
+    if (from === path.join(to, filename)) {
+      return
+    }
     return fs.copySync(from, path.join(to, filename), options)
+  }
+  if (from === to) {
+    return
   }
   fs.ensureDir(path.dirname(to))
   return fs.copySync(from, to, options)
@@ -2124,6 +2197,7 @@ async function build ({ watch, adapter }) {
     'process.env.TARO_ENV': buildAdapter
   })
   buildProjectConfig()
+  await buildFrameworkInfo()
   copyFiles()
   appConfig = await buildEntry()
   await buildPages()

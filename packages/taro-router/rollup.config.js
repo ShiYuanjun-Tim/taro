@@ -1,24 +1,22 @@
-import { pipe, set } from 'lodash/fp'
-import { join } from 'path'
 import babel from 'rollup-plugin-babel'
 import commonjs from 'rollup-plugin-commonjs'
 import resolve from 'rollup-plugin-node-resolve'
 import typescript from 'rollup-plugin-typescript'
 
-const cwd = __dirname
-
-const entries = [{
-  input: 'index.tsx',
-  output: 'index.js'
-}]
-
-const baseConfig = {
+export default {
+  input: 'src/index.tsx',
   external: ['nervjs', '@tarojs/taro-h5'],
-  output: {
+  output: [{
+    file: 'dist/index.js',
     format: 'cjs',
     sourcemap: false,
-    exports: 'named'
-  },
+    exports: 'auto'
+  }, {
+    file: 'dist/index.esm.js',
+    format: 'esm',
+    sourcemap: false,
+    exports: 'auto'
+  }],
   plugins: [
     resolve({
       preferBuiltins: false
@@ -48,12 +46,3 @@ const baseConfig = {
     clearScreen: true
   }
 }
-
-const appendConfigs = ({input, output}) => {
-  return pipe(
-    set('input', join(cwd, `src/${input}`)),
-    set('output.file', join(cwd, `dist/${output}`))
-  )(baseConfig)
-}
-
-export default entries.map(appendConfigs)

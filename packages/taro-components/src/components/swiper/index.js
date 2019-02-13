@@ -1,3 +1,4 @@
+import 'weui'
 import Nerv from 'nervjs'
 import classNames from 'classnames'
 import Swipers from 'swiper/dist/js/swiper.min.js'
@@ -32,7 +33,8 @@ class Swiper extends Nerv.Component {
       onChange,
       circular,
       vertical,
-      onAnimationfinish
+      onAnimationfinish,
+      spaceBetween
     } = this.props
 
     const opt = {
@@ -77,18 +79,25 @@ class Swiper extends Nerv.Component {
       }
     }
 
+    // 两端距离
+    if (spaceBetween) {
+      opt.spaceBetween = spaceBetween
+    }
+
     this.mySwiper = new Swipers(this.$el, opt)
   }
 
   componentWillReceiveProps (nextProps) {
-    const nextCurrent = nextProps.current || 0
-    // 是否衔接滚动模式
-    if (nextProps.circular) {
-      this.mySwiper.slideToLoop(parseInt(nextCurrent, 10)) // 更新下标
-    } else {
-      this.mySwiper.slideTo(parseInt(nextCurrent, 10)) // 更新下标
+    if (this.mySwiper) {
+      const nextCurrent = nextProps.current || 0
+      // 是否衔接滚动模式
+      if (nextProps.circular) {
+        this.mySwiper.slideToLoop(parseInt(nextCurrent, 10)) // 更新下标
+      } else {
+        this.mySwiper.slideTo(parseInt(nextCurrent, 10)) // 更新下标
+      }
+      this.mySwiper.update() // 更新子元素
     }
-    this.mySwiper.update() // 更新子元素
   }
 
   componentWillUnmount () {

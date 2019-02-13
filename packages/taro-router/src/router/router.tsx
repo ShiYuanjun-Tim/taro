@@ -1,6 +1,8 @@
 import Taro, { Component } from '@tarojs/taro-h5';
 import Nerv from 'nervjs';
 import invariant from 'invariant';
+import toPairs from 'lodash/toPairs';
+import assign from 'lodash/assign';
 
 import { createNavigateBack, createNavigateTo, createRedirectTo } from '../apis';
 import Route from './route';
@@ -10,6 +12,7 @@ interface Props {
   history: Types.History;
   routes: Types.RouteObj[];
   children?: any[];
+  customRoutes: Types.CustomRoutes;
 }
 
 interface State {
@@ -17,10 +20,14 @@ interface State {
   routeStack: Types.RouteObj[];
 }
 
+type OriginalRoute = string;
+type MappedRoute = string;
+
 class Router extends Component<Props, State> {
   unlisten: () => void;
   lastLocation: Types.Location;
   currentPages: any[] = [];
+  customRoutes: [OriginalRoute, MappedRoute][] = [];
 
   state = {
     location: this.props.history.location,
@@ -39,7 +46,14 @@ class Router extends Component<Props, State> {
 
   computeMatch (location: Types.Location): Types.RouteObj {
     // 找出匹配的路由组件
-    const pathname = location.path;
+    const originalPathname = location.path;
+    let pathname = originalPathname
+    const foundRoute = this.customRoutes.find(([originalRoute, mappedRoute]) => {
+      return originalPathname === mappedRoute
+    })
+    if (foundRoute) {
+      pathname = foundRoute[0]
+    }
     const matchedRoute = this.props.routes.find(({path, isIndex}) => {
       if (isIndex && pathname === '/') return true;
       return pathname === path;
@@ -53,8 +67,9 @@ class Router extends Component<Props, State> {
   push (toLocation: Types.Location) {
     const routeStack: Types.RouteObj[] = [...this.state.routeStack]
     const matchedRoute = this.computeMatch(toLocation)
-    routeStack.push(Object.assign({}, matchedRoute, {
-      key: toLocation.state.key
+    routeStack.push(assign({}, matchedRoute, {
+      key: toLocation.state.key,
+      isRedirect: false
     }))
     this.setState({ routeStack, location: toLocation })
   }
@@ -70,8 +85,9 @@ class Router extends Component<Props, State> {
     if (routeStack.length === 0) {
       // 不存在历史栈, 需要重新构造
       const matchedRoute = this.computeMatch(toLocation)
-      routeStack = [Object.assign({}, matchedRoute, {
-        key: toLocation.state.key
+      routeStack = [assign({}, matchedRoute, {
+        key: toLocation.state.key,
+        isRedirect: false
       })]
     }
 
@@ -81,8 +97,9 @@ class Router extends Component<Props, State> {
   replace (toLocation: Types.Location) {
     const routeStack: Types.RouteObj[] = [...this.state.routeStack]
     const matchedRoute = this.computeMatch(toLocation)
-    routeStack.splice(-1, 1, Object.assign({}, matchedRoute, {
-      key: toLocation.state.key
+    routeStack.splice(-1, 1, assign({}, matchedRoute, {
+      key: toLocation.state.key,
+      isRedirect: true
     }))
     this.setState({ routeStack, location: toLocation })
   }
@@ -92,9 +109,10 @@ class Router extends Component<Props, State> {
   }
 
   componentWillMount () {
-    const { history } = this.props
+    const { history, customRoutes } = this.props
 
     this.mountApis()
+    this.customRoutes = toPairs(customRoutes)
 
     this.unlisten = history.listen(({
       fromLocation,
@@ -128,7 +146,7 @@ class Router extends Component<Props, State> {
     router.currentPages.length = this.state.routeStack.length
     return (
       <div className="taro_router">
-        {this.state.routeStack.map(({ path, componentLoader, isIndex, key }, k) => {
+        {this.state.routeStack.map(({ path, componentLoader, isIndex, key, isRedirect }, k) => {
           return (
             <Route
               path={path}
@@ -137,6 +155,7 @@ class Router extends Component<Props, State> {
               isIndex={isIndex}
               key={key}
               k={k}
+              isRedirect={isRedirect}
               collectComponent={this.collectComponent}
             />
           )

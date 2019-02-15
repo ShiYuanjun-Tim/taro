@@ -20,6 +20,7 @@ import { Adapters, Adapter } from './adapter'
 import { LoopRef } from './interface'
 import generate from 'babel-generator'
 import refPatcher from './patchs/refMethodsPatch'
+import ejectUIFragMethod from './patchs/ejectUIFragMethod'
 type ClassMethodsMap = Map<string, NodePath<t.ClassMethod | t.ClassProperty>>
 
 function buildConstructor () {
@@ -222,6 +223,7 @@ class Transformer {
   traverse () {
     const self = this
     self.classPath.traverse({
+      // 规范 数组map生成的组件中ref的使用
       JSXOpeningElement: (path) => {
         const jsx = path.node
         const attrs = jsx.attributes
@@ -237,7 +239,7 @@ class Transformer {
         const idAttr = findJSXAttrByName(attrs, 'id')
         let id: string = createRandomLetters(5)
         let idExpr: t.Expression
-        if (!idAttr) {
+        if (!idAttr) {  // 找到[].map()生成组件的用法 并且如用里面的组件用了ref属性的话，需要处理idi属性
           if (loopCallExpr && loopCallExpr.isCallExpression()) {
             const [ func ] = loopCallExpr.node.arguments
             let indexId: t.Identifier | null = null
@@ -251,7 +253,7 @@ class Transformer {
             attrs.push(t.jSXAttribute(t.jSXIdentifier('id'), t.jSXExpressionContainer(
               t.binaryExpression('+', t.stringLiteral(id), indexId)
             )))
-          } else {
+          } else { // 补全id属性 值用随机字母
             attrs.push(t.jSXAttribute(t.jSXIdentifier('id'), t.stringLiteral(id)))
           }
         } else {
@@ -301,6 +303,10 @@ class Transformer {
           }
         }
       },
+      /* 给类中的方法归类  this.renderMethod /methods
+        处理render中if中的return语句 用return null替换
+        找出constructor中initState =》 this.state的赋值表达
+       */
       ClassMethod (path) {
         const node = path.node
         if (t.isIdentifier(node.key)) {
@@ -343,6 +349,7 @@ class Transformer {
           }
         }
       },
+      /* 把if中的判断条件 单独用变量替换  */
       IfStatement (path) {
         const test = path.get('test') as NodePath<t.Expression>
         const consequent = path.get('consequent')
@@ -351,6 +358,9 @@ class Transformer {
           generateAnonymousState(scope, test, self.jsxReferencedIdentifiers, true)
         }
       },
+      /*
+        额外补充initState 和methods的来源 可能写成属性形式
+       */
       ClassProperty (path) {
         const { key: { name }, value } = path.node
         if (t.isArrowFunctionExpression(value) || t.isFunctionExpression(value)) {
@@ -394,9 +404,9 @@ class Transformer {
             calleeExpr.isMemberExpression() &&
             calleeExpr.get('object').isMemberExpression() &&
             calleeExpr.get('property').isIdentifier({ name: 'bind' })) // is not bind
-        ) {
+        ) {// 复杂表达式 却非xx.bind()形式的方法调用
           generateAnonymousState(scope, expression, self.jsxReferencedIdentifiers)
-        } else {
+        } else {// key 属性 或者 属性是个 成员表达试
           if (parentPath.isJSXAttribute()) {
             if (!(expression.isMemberExpression() || expression.isIdentifier()) && parentPath.node.name.name === 'key') {
               generateAnonymousState(scope, expression, self.jsxReferencedIdentifiers)
@@ -683,6 +693,9 @@ class Transformer {
   }
 
   compile () {
+    // GAI:16
+    const initIdentifiersInState: t.Identifier[] = ejectUIFragMethod(this.classPath.get('body') as NodePath<t.ClassBody>)
+    this.jsxReferencedIdentifiers = new Set(initIdentifiersInState)
     this.traverse()
     this.setComponents()
     this.resetConstructor()

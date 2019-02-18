@@ -69,22 +69,15 @@ function ejectMethod (scope: Scope, callExpPath: NodePath<t.CallExpression>, met
   // 获取定义的处参数名字
   const newMethodParamNames = methodParamsPathArr.map((param) => {
     return varDefinationRenamer(param,scope, identifierCollection)
-    // if (param.isIdentifier()) {
-    //   const newParamName = _renameIdentifier(param, scope)
-    //   identifierCollection.push(t.identifier(newParamName))
-    //   return t.identifier(newParamName)
-    // } else if (param.isPattern()) {
-    //   exploreVarDefInPattern(param,scope, identifierCollection)
-    //   return _.cloneDeep(param.node)
-    // } else throw new Error('未知参数目前不支持')
   })
 
   // 获取调用处传入的参数 组成参数定义
   let varDeclarations = (callExpPath.get('arguments') as any).map((paramVal, index) => {
-    return buildConstVariableDeclaration(newMethodParamNames[index], paramVal.node)
+    return buildConstVariableDeclaration(newMethodParamNames[index] , paramVal.node)
   })
   // 获取原方法中return之前的一些语句
-  const statementsArr = (methodPath.get('body.body') as any)
+  const methodBody = methodPath.get('body')
+  const statementsArr = (methodBody.isBlockStatement() ? methodBody.get('body') as any : [])
     .filter(dec => !dec.isReturnStatement()).map(decpath => {
       if (decpath.isVariableDeclaration()) {
         // 变量换名字
@@ -92,14 +85,6 @@ function ejectMethod (scope: Scope, callExpPath: NodePath<t.CallExpression>, met
           const oldId = varDeclarator.get('id')
 
           return varDefinationRenamer(oldId , scope , identifierCollection)
-
-  /*         if (oldId.isIdentifier()) {
-            const newName = _renameIdentifier(oldId, scope)
-            identifierCollection.push(t.identifier(newName))
-          } else if (oldId.isPattern()) {
-            exploreVarDefInPattern(oldId,scope, identifierCollection)
-            return _.cloneDeep(oldId.node)
-          } else throw new Error('未知参数目前不支持。') */
         })
       } else {
         throw new Error('该类型的申明未实现')
@@ -112,7 +97,7 @@ function ejectMethod (scope: Scope, callExpPath: NodePath<t.CallExpression>, met
   const insertPosition = (callExpPath.scope.block as any).body.body.indexOf(callExpPath.getStatementParent().node)
   Array.prototype.splice.apply((callExpPath.scope.block as any).body.body, [insertPosition, 0].concat(varDeclarations))
   // 方法return部分替换调用
-  callExpPath.replaceWith(_.cloneDeep(methodReturnPath.get('argument').node))
+  callExpPath.replaceWith(_.cloneDeep(methodReturnPath))
 
   return identifierCollection
 }
@@ -175,30 +160,61 @@ function _renameIdentifier (idPath: NodePath<t.Identifier>, scope: Scope): strin
   return newParamName
 }
 
-function isUIFragMethod (methodPath) {
+export function isUIFragMethod (methodPath) {
   let onlyReturnUI = false
+  let returnClauseCount = 0
   methodPath.traverse({
     ReturnStatement (retPath) {
-      const isReturnJSX = retPath.get('argument').isJSXElement() || retPath.get('argument').isNullLiteral()
-      if (!isReturnJSX) {
-        onlyReturnUI = false
-        retPath.stop();
-      } else {
+      const theMethodofReturn = retPath.getFunctionParent()
+      // return 所属方法必须是类的方法或者属性
+      if (theMethodofReturn === methodPath || theMethodofReturn.parentPath === methodPath) {
+        returnClauseCount += 1
+        const theReturned = retPath.get('argument')
+        const isReturnJSX = theReturned.isJSXElement()
+          || theReturned.isNullLiteral()
+          || (theReturned.isCallExpression() && theReturned.get('callee.property').isIdentifier({ name: 'map' })) // return [].map() style
+        if (!isReturnJSX) {
+          onlyReturnUI = false
+        } else {
+          onlyReturnUI = true
+        }
+      }
+
+    },
+    ArrowFunctionExpression (arrowfunPath) {// 匹配 class中  prop=()=><JSX>形式的代码
+      if (methodPath.isClassProperty()
+        && arrowfunPath.node === methodPath.node.value
+        && !arrowfunPath.get('body').isBlockStatement()
+      ) {
         onlyReturnUI = true
+        returnClauseCount += 1
       }
     }
   })
 
-  return onlyReturnUI
+  return onlyReturnUI && returnClauseCount === 1
 }
 
 function assertOneReturn (methodPath) {
   let count = 0
   let ret
+
+  if (methodPath.isArrowFunctionExpression()) {
+    if (methodPath.parentPath.isClassProperty()
+      && !methodPath.get('body').isBlockStatement()
+    ) {
+      count += 1
+      ret = methodPath.get('body').node
+    }
+  }
+
   methodPath.traverse({
     ReturnStatement (retPath) {
-      count += 1
-      ret = retPath
+      if (retPath.getFunctionParent() === methodPath) {
+        count += 1
+        ret = retPath.get('argument').node
+      }
+
     }
   })
 
@@ -212,7 +228,7 @@ function buildConstVariableDeclaration (
   variableExp,
   expresion
 ) {
-  return t.variableDeclaration('const', [
+  return variableExp ? t.variableDeclaration('const', [
     t.variableDeclarator(variableExp, expresion)
-  ])
+  ]) : t.nullLiteral()
 }

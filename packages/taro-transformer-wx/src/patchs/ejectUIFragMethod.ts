@@ -1,10 +1,9 @@
 import * as t from 'babel-types'
-import { NodePath, Scope } from 'babel-traverse'
+import { NodePath, Scope, Binding } from 'babel-traverse'
  // const template = require('@babel/template').default
 const _ = require('lodash')
 
 /* GAI:16
-
 */
 export default function ejectUIFragMethod (classBodyPath: NodePath<t.ClassBody>): t.Identifier[] {
   let methodMap = new Map()
@@ -20,7 +19,7 @@ export default function ejectUIFragMethod (classBodyPath: NodePath<t.ClassBody>)
   }
 
   let identifierCollection: t.Identifier[] = []
-  const uIFragMethodQueue2Delete: NodePath<any>[] = []
+  const uIFragMethodSet2Delete: Set<NodePath<any>> = new Set()
   classBodyPath.traverse({
     CallExpression (path: NodePath<t.CallExpression>) {
 
@@ -32,11 +31,11 @@ export default function ejectUIFragMethod (classBodyPath: NodePath<t.ClassBody>)
       ) {
         const methodName = (callee.get('property').node as t.Identifier).name
         const methodPath = findMethodByName(methodName)
-        const renderPath = findMethodByName('render')
+        // const renderPath = findMethodByName('render')
 
         if (methodPath && isUIFragMethod(methodPath)) {
-          uIFragMethodQueue2Delete.push(methodPath)
-          const varIdentifiersThatNeededInState = ejectMethod(renderPath.scope, path,
+          uIFragMethodSet2Delete.add(methodPath)
+          const varIdentifiersThatNeededInState = ejectMethod(path,
             methodPath.isClassMethod() ? methodPath : methodPath.get('value'))
 
           identifierCollection = identifierCollection.concat(varIdentifiersThatNeededInState)
@@ -47,7 +46,7 @@ export default function ejectUIFragMethod (classBodyPath: NodePath<t.ClassBody>)
 
   methodMap = null as any
   // clear uIFragMethodQueue
-  uIFragMethodQueue2Delete.forEach(del => del.remove())
+  uIFragMethodSet2Delete.forEach(del => del.remove())
   return identifierCollection
 }
 
@@ -61,14 +60,14 @@ export default function ejectUIFragMethod (classBodyPath: NodePath<t.ClassBody>)
   6 就近插入到调用法所在scope
   7 用方法的 return内容替换函数调用
 */
-function ejectMethod (scope: Scope, callExpPath: NodePath<t.CallExpression>, methodPath: NodePath<t.Function>): t.Identifier[] {
+function ejectMethod (callExpPath: NodePath<t.CallExpression>, methodPath: NodePath<t.Function>): t.Identifier[] {
 
   const identifierCollection: t.Identifier[] = []
   const methodParamsPathArr: Array<NodePath<any>> = methodPath.get('params') as any
   const methodReturnPath = assertOneReturn(methodPath)
   // 获取定义的处参数名字
   const newMethodParamNames = methodParamsPathArr.map((param) => {
-    return varDefinationRenamer(param,scope, identifierCollection)
+    return varDefinationRenamer(param,callExpPath.scope, identifierCollection)
   })
 
   // 获取调用处传入的参数 组成参数定义
@@ -84,9 +83,17 @@ function ejectMethod (scope: Scope, callExpPath: NodePath<t.CallExpression>, met
         decpath.get('declarations').forEach(varDeclarator => {
           const oldId = varDeclarator.get('id')
 
-          return varDefinationRenamer(oldId , scope , identifierCollection)
+          return varDefinationRenamer(oldId , callExpPath.scope , identifierCollection)
         })
-      } else {
+      } else if (
+        !(
+          decpath.isSwitchStatement()
+          || decpath.isIfStatement()
+          || decpath.isExpressionStatement()
+          || decpath.isBlockStatement()
+          || decpath.isFunctionExpression()
+        )
+      ) {
         throw new Error('该类型的申明未实现')
       }
       return decpath.node
@@ -94,8 +101,17 @@ function ejectMethod (scope: Scope, callExpPath: NodePath<t.CallExpression>, met
   // 所有的额外定义都需要添加到 调用法最进的方法定义出
   varDeclarations = varDeclarations.concat(statementsArr)
   // 添加这些变量申明到该调用所属的scope中， 位置最靠近调用方， 防止在申明前就使用变量
-  const insertPosition = (callExpPath.scope.block as any).body.body.indexOf(callExpPath.getStatementParent().node)
-  Array.prototype.splice.apply((callExpPath.scope.block as any).body.body, [insertPosition, 0].concat(varDeclarations))
+  const blockStatementWhereFunIsCalled = (callExpPath.scope.block as any).body
+  const insertPosition = blockStatementWhereFunIsCalled.body.indexOf(callExpPath.getStatementParent().node)
+  Array.prototype.splice.apply(blockStatementWhereFunIsCalled.body, [insertPosition, 0].concat(varDeclarations))
+// 重新注册新加的声明到binding中
+  const blockStatementPath = callExpPath.scope.path.get('body');
+  (blockStatementPath.get('body') as any).forEach(mayBeDecl => {
+    if (mayBeDecl.isVariableDeclaration()) {
+      callExpPath.scope.registerDeclaration(mayBeDecl)
+    }
+  })
+
   // 方法return部分替换调用
   callExpPath.replaceWith(_.cloneDeep(methodReturnPath))
 
@@ -170,10 +186,8 @@ export function isUIFragMethod (methodPath) {
       if (theMethodofReturn === methodPath || theMethodofReturn.parentPath === methodPath) {
         returnClauseCount += 1
         const theReturned = retPath.get('argument')
-        const isReturnJSX = theReturned.isJSXElement()
-          || theReturned.isNullLiteral()
-          || (theReturned.isCallExpression() && theReturned.get('callee.property').isIdentifier({ name: 'map' })) // return [].map() style
-        if (!isReturnJSX) {
+        const isReturnNotJSX = predictSomeIdentifierType(theReturned, isNotJSXCompatible)
+        if (isReturnNotJSX) {
           onlyReturnUI = false
         } else {
           onlyReturnUI = true
@@ -231,4 +245,32 @@ function buildConstVariableDeclaration (
   return variableExp ? t.variableDeclaration('const', [
     t.variableDeclarator(variableExp, expresion)
   ]) : t.nullLiteral()
+}
+
+function predictSomeIdentifierType (identifierPath: NodePath<t.Identifier>, predictor: (expPath) => boolean): boolean {
+  const binding: Binding | undefined = identifierPath.scope.getBinding(identifierPath.node.name)
+  const bindingInit = binding && binding.path.get('init')
+  let candiate = binding && binding.constantViolations || []
+
+  bindingInit && bindingInit.node && candiate.push(bindingInit) // 未初始化的变量
+
+  return (candiate).some((assign) => {
+    if (assign.isAssignmentExpression()) {
+      const rightPath = assign.get('right')
+      if (rightPath.isIdentifier()) {
+        return predictSomeIdentifierType(rightPath, predictor)
+      } else {
+        return predictor(rightPath)
+      }
+    } else {
+      return predictor(assign)
+    }
+  })
+}
+
+function isNotJSXCompatible (theReturned: NodePath<t.Node>) {
+  const isJSXCompatible = theReturned.isJSXElement()
+    || theReturned.isNullLiteral()
+    || (theReturned.isCallExpression() && theReturned.get('callee.property').isIdentifier({ name: 'map' })) // return [].map() style
+  return !isJSXCompatible
 }

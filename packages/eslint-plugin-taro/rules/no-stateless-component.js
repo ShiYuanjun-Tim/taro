@@ -24,7 +24,7 @@ module.exports = {
 
         const funcExpression = parents.find(p => p.type === 'ArrowFunctionExpression' || p.type === 'FunctionExpression')
 
-        if (funcExpression && funcExpression.parent.type !== 'MethodDefinition') {
+        if (funcExpression && funcExpression.parent.type !== 'MethodDefinition' && funcExpression.parent.type !== 'ClassProperty') {
           const arrowFuncParents = context.getAncestors(funcExpression)
           const isMapCallExpr = arrowFuncParents.some(p =>
             p.type === 'CallExpression' &&

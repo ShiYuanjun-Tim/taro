@@ -12,6 +12,7 @@ function isObject (val) {
   return val != null && typeof val === 'object' && Array.isArray(val) === false
 }
 
+const flexConatinerProps = ['flexDirection', 'justifyContent', 'alignItems']
 export function inlineStyle (obj) {
   if (obj == null) {
     return ''
@@ -35,11 +36,10 @@ export function inlineStyle (obj) {
     throw new TypeError('style 只能是一个对象或字符串。')
   }
 
-  // detect width when flexDirection is row
-  if (allStyle.flexDirection === 'row' && !('width' in allStyle)) {
-    // TODO: 有待商榷
-    // allStyle['width'] = '100%'
+  // detect whether the component is used as a flex box
 
+  if (flexConatinerProps.some(prop => (prop in allStyle))) {
+    allStyle['display'] = 'flex'
   }
 
   const addtionalSty = []

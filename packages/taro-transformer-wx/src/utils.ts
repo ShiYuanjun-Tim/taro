@@ -119,9 +119,9 @@ export function generateAnonymousState (
     throw codeFrameError(expression.node.loc, '无法生成匿名 State，尝试先把值赋到一个变量上再把变量调换。')
   }
   const jsx = isLogical ? expression : expression.findParent(p => p.isJSXElement())
-  const callExpr = jsx.findParent(p => p.isCallExpression() && isArrayMapCallExpression(p)) as NodePath<t.CallExpression>
+  const callExpr = jsx.findParent(p => p.isCallExpression() && isArrayMapCallExpression(p)) as NodePath<t.CallExpression>// 是否是数组map的回调call
   const ifExpr = jsx.findParent(p => p.isIfStatement())
-  const blockStatement = jsx.findParent(p => p.isBlockStatement() && p.parentPath === ifExpr) as NodePath<t.BlockStatement>
+  const blockStatement = jsx.findParent(p => p.isBlockStatement() && p.parentPath === ifExpr) as NodePath<t.BlockStatement> // if中的blockstateme
   const expr = setParentCondition(jsx, cloneDeep(expression.node))
   if (!callExpr) {
     refIds.add(t.identifier(variableName))

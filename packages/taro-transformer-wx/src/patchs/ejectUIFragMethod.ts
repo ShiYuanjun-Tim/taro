@@ -186,12 +186,7 @@ export function isUIFragMethod (methodPath) {
       if (theMethodofReturn === methodPath || theMethodofReturn.parentPath === methodPath) {
         returnClauseCount += 1
         const theReturned = retPath.get('argument')
-        const isReturnNotJSX = predictSomeIdentifierType(theReturned, isNotJSXCompatible)
-        if (isReturnNotJSX) {
-          onlyReturnUI = false
-        } else {
-          onlyReturnUI = true
-        }
+        onlyReturnUI = ! (theReturned.node ? predictSomeIdentifierType(theReturned, isNotJSXCompatible) : true)
       }
 
     },

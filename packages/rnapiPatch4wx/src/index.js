@@ -5,6 +5,7 @@ import PixelRatio from './api/PixelRatio'
 import Platform from './api/Platform'
 import StyleSheet from './api/StyleSheet'
 import NativeEventEmitter from './api/NativeEventEmitter'
+import ListView from './api/ListView'
 
 const NativeAppEventEmitter = new NativeEventEmitter()
 
@@ -15,7 +16,9 @@ export {
   Platform,
   StyleSheet,
   NativeEventEmitter,
-  NativeAppEventEmitter
+  NativeAppEventEmitter,
+
+  ListView
 }
 
 const ReactNative = {
@@ -25,7 +28,9 @@ const ReactNative = {
   Platform,
   StyleSheet,
   NativeEventEmitter,
-  NativeAppEventEmitter
+  NativeAppEventEmitter,
+
+  ListView
 }
 
 export default ReactNative

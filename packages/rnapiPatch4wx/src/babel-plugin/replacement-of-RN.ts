@@ -4,6 +4,7 @@ import * as template from 'babel-template'
 
 // import generate from 'babel-generator'
 import {turnRequireLocalImgToBase64Str} from "../patchs/imagePatch"
+import listViewTransformer from "../patchs/ListViewPatch"
 declare const exports:any;
 declare const module:any;
 
@@ -22,7 +23,8 @@ const conversionMap = {
   , Platform: importReplacement
   , StyleSheet: importReplacement
   , NativeEventEmitter: importReplacement
-  ,NativeAppEventEmitter: importReplacement
+  , NativeAppEventEmitter: importReplacement
+  , ListView : importReplacement
 
 }
 
@@ -70,84 +72,91 @@ exports.default = function() {
 
     // },
     visitor: {
-      ImportDeclaration: function conversionOfReactNativeImport (path: NodePath<t.ImportDeclaration>) {
-        const depName = path.node.source.value
-      
-        switch(depName) {
-
-          case 'react-native' : {
-            const imports: Array<NodePath<t.ImportSpecifier>> = path.get('specifiers') as any
-            const theReplaceArr = imports.map((impSpec) => {
-              const compName = impSpec.node.imported.name
-              return (conversionMap[compName] || remove)(impSpec)
-            }).filter(path => path != null)
-        
-            if (theReplaceArr.length > 0) {
-              const newImport = t.importDeclaration(theReplaceArr , t.stringLiteral(RN_MODULE_NAME_REPLACEMENT))
-              path.insertBefore(newImport)
-            }
-            // GAI:2
-            path.remove()
-            break;
-          }
-
-
-          case 'axios': {
-            const defaultImport  =path.get('specifiers.0')
-            if(defaultImport && defaultImport.isImportDefaultSpecifier()) {
-                throw new Error('please implemnt here')
-            }
-
-            break
-          }
-
-
-        }
-
-       
-
-        
-      
-      },
-      CallExpression (path , state) {
-        const callee = path.get('callee')
-       
-        if (callee.isIdentifier({ name: 'require' })) {
-          const requiredpath = path.get('arguments.0')
-          const libName = requiredpath.node.value
-
-          switch(libName) {
-
-            case 'react-native': {
-              requiredpath.replaceWith(t.stringLiteral(RN_MODULE_NAME_REPLACEMENT))
-              break
-            }
-
-            case 'axios' : {
-              const varNamePath = path.getSibling('id') || path.getSibling('left')
-              const varName = varNamePath.node.name
-              const toInsert = template(`
-              const _wechatAdapter = require('axios-miniprogram-adapter');
-              ${varName}.default.defaults.adapter = _wechatAdapter;
-              `)()
-              path.getStatementParent().insertAfter(toInsert)
-              break
-            }
-
-
-            default: {// img require repalce
-              const conf = state.opts;
-              if(conf.filepath) {
-                const base64 = turnRequireLocalImgToBase64Str(path, conf.filepath, conf.alias)
-                if (base64) {
-                  path.replaceWith(base64)
+      // make sure run before the eslint
+      Program(programPath, state) {
+        programPath.traverse({
+          ImportDeclaration: function conversionOfReactNativeImport (path: NodePath<t.ImportDeclaration>) {
+            const depName = path.node.source.value
+          
+            switch(depName) {
+    
+              case 'react-native' : {
+                const imports: Array<NodePath<t.ImportSpecifier>> = path.get('specifiers') as any
+                const theReplaceArr = imports.map((impSpec) => {
+                  const compName = impSpec.node.imported.name
+                  return (conversionMap[compName] || remove)(impSpec)
+                }).filter(path => path != null)
+            
+                if (theReplaceArr.length > 0) {
+                  const newImport = t.importDeclaration(theReplaceArr , t.stringLiteral(RN_MODULE_NAME_REPLACEMENT))
+                  path.insertBefore(newImport)
                 }
+                // GAI:2
+                path.remove()
+                break;
+              }
+    
+              case 'axios': {
+                const defaultImport  =path.get('specifiers.0')
+                if(defaultImport && defaultImport.isImportDefaultSpecifier()) {
+                    throw new Error('please implemnt here')
+                }
+                break
+              }
+
+            }
+          },
+          CallExpression (path ) {
+            const callee = path.get('callee')
+           
+            if (callee.isIdentifier({ name: 'require' })) {
+              const requiredpath = path.get('arguments.0')
+              const libName = requiredpath.node.value
+    
+              switch(libName) {
+    
+                case 'react-native': {
+                  requiredpath.replaceWith(t.stringLiteral(RN_MODULE_NAME_REPLACEMENT))
+                  break
+                }
+    
+                case 'axios' : {
+                  const varNamePath = path.getSibling('id') || path.getSibling('left')
+                  const varName = varNamePath.node.name
+                  const toInsert = template(`
+                  const _wechatAdapter = require('axios-miniprogram-adapter');
+                  ${varName}.default.defaults.adapter = _wechatAdapter;
+                  `)()
+                  path.getStatementParent().insertAfter(toInsert)
+                  break
+                }
+    
+    
+                default: {// img require repalce
+                  const conf = state.opts;
+                  if(conf.filepath) {
+                    const base64 = turnRequireLocalImgToBase64Str(path, conf.filepath, conf.alias)
+                    if (base64) {
+                      path.replaceWith(base64)
+                    }
+                  }
+                }
+    
+    
               }
             }
-
-
+          },
+          JSXOpeningElement(path) {
+            const { name } = path.node.name as t.JSXIdentifier
+    
+            if (name === 'ListView') {
+              listViewTransformer(path)
+            }
+            // if (name === 'ScrollView') {
+            //   scrollViewTransformer(path)
+            // }
           }
-        }
+        })
       }
     },
   };

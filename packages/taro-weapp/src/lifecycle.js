@@ -67,6 +67,15 @@ function doUpdate (component, prevProps, prevState) {
     // 返回null或undefined则保持不变
     data = component._createData(state, props) || data
   }
+
+  initListSourceProp(component, data)
+  // //GAI:17  每次列表数据变动是否是重置量 初略判定标准是 头尾数据一致
+  //   const resetedDsNameSet=new Set()
+  //   if(component.__mapped_listSource__ && component.___listSource__) {
+  //     component.___listSource__.forEach(config=>{
+  //     })
+  //   }
+
   let privatePropKeyVal = component.$scope.data[privatePropKeyName] || false
 
   data = Object.assign({}, props, data)
@@ -101,7 +110,72 @@ function doUpdate (component, prevProps, prevState) {
     component._pendingCallbacks = []
   }
 
-  component.$scope.setData(dataDiff, function () {
+  // GAI:17 dataDiff中如果有dataSource改动，需要把转化后的key对应数据切片跟新，并且原ds数据直接修改不走setData
+  if (component.__mapped_listSource__ && component.___listSource__) {
+    const opreations = component.___listSource__.reduce((sum, config) => {
+      const {name, mapto} = config
+      const originDs = dataDiff[name]
+      const mappedDs = dataDiff[mapto]
+      if (originDs && component.$scope.data[name]) {
+        const lastIndex = component.$scope.data[name].length
+        if (mappedDs.length > lastIndex) {
+          for (let start = lastIndex; start < mappedDs.length; start++) {
+            sum.add(`${mapto}[${start}]`, mappedDs[start])
+          }
+          delete dataDiff[mapto]
+        } else {
+
+        }
+        // 可直接操作 component.$scope.data.xx =value 这里的数据只是用于转化成loopArray中数据，不影响UI
+        component.$scope.data[name] = originDs
+        delete dataDiff[name]
+      }
+
+      return sum
+    }, {
+      updateslice: [],
+      sliceCount: 0,
+
+      _temp: {},
+      _count: 0,
+
+      _limit: component.__wxBatchCount || 100,
+      _updateSlice () {
+        if (this._count) {
+          this._count = 0
+          this.updateslice.push(this._temp)
+          this._temp = {}
+          this.sliceCount += 1
+        }
+      },
+      add (key, value) {
+        this._temp[key] = value
+        this._count++
+        if (this._count >= this._limit) {
+          this._updateSlice()
+        }
+      }
+    })
+    opreations._updateSlice()
+    opreations.updateslice.forEach((slice, index) => {
+      let cb
+      if (index === 0) {
+        Object.assign(slice, dataDiff)
+        //  dataDiff = {} 报错dataDiff只读需要删除所有数据
+        for (let k in dataDiff) {
+          delete dataDiff[k]
+        }
+      }
+      if (opreations.sliceCount === index - 1) { // 最后一批需要设置回调
+        cb = callback
+      }
+      component.$scope.setData(slice, cb)
+    })
+  }
+
+  Object.keys(dataDiff).length && component.$scope.setData(dataDiff, callback)
+
+  function callback () {
     if (__mounted) {
       if (component['$$refs'] && component['$$refs'].length > 0) {
         component['$$refs'].forEach(ref => {
@@ -131,5 +205,29 @@ function doUpdate (component, prevProps, prevState) {
         typeof cbs[i] === 'function' && cbs[i].call(component)
       }
     }
-  })
+  }
+}
+
+function initListSourceProp (component, data) {
+  // GAI:17 初始化数据用来判定ds对应生成的新的数据源的变量名字
+  if (!component.__mapped_listSource__ && component.___listSource__) {
+    component.___listSource__.forEach(config => {
+      const dsName = config.name
+      // 找到dataSource对应的哪个重新loop生成的 属性所在的key名
+      const originDs = data[dsName]
+      if (originDs && originDs.length > 0) {
+        const theMappedLoopKey = Object.keys(data).find(loopKey => {
+          const len = data[loopKey] && data[loopKey].length
+          return loopKey !== dsName &&
+            len === originDs.length &&
+            data[dsName][0] === data[loopKey][0].$original &&
+            data[dsName][len - 1] === data[loopKey][len - 1].$original
+        })
+        if (theMappedLoopKey) {
+          config.mapto = theMappedLoopKey
+        }
+      }
+    })
+    component.__mapped_listSource__ = true
+  }
 }

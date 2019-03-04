@@ -31,22 +31,7 @@ const defaultBabelConfig = require('../config/babel')
 const npmProcess = require('./npm')
 
 const excludeNpmPkgs = ['ReactPropTypes', 'react-native', '@yqb/rnpack']
-// GAI:13
-const skipRemoveRule = [
-  '@yqb/rnframework/lib/token/cashier',
-  '@yqb/rnframework/lib/request/cashier',
-  '@yqb/rnframework/lib/utils/PafAnimation',
-  '@yqb/rnframework/lib/utils/i18n',
-  '@yqb/rnframework/lib/utils/web',
-  '@yqb/rnframework/lib/i18n',
-  '@yqb/rnframework/lib/decorators/withBusinessParams',
 
-  process.cwd() + '/config/locale',
-
-  // axios库中wx端名确不会有如下代码的使用
-  'node_modules/axios/lib/adapters',
-  /\.(web|ios|android)\.?/
-]
 const resolvedCache = {}
 const copyedFiles = {}
 
@@ -56,6 +41,8 @@ const projectConfig = require(configDir)(_.merge)
 const pluginsConfig = projectConfig.plugins || {}
 const outputDirName = projectConfig.outputRoot || CONFIG.OUTPUT_DIR
 const pathAlias = projectConfig.alias || {}
+// GAI:13
+const skipRemoveRule = projectConfig.ignoredRequire || []
 
 const babelConfig = _.mergeWith(defaultBabelConfig, pluginsConfig.babel, (objValue, srcValue) => {
   if (Array.isArray(objValue)) {

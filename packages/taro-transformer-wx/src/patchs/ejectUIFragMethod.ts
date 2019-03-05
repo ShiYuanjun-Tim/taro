@@ -3,6 +3,29 @@ import { NodePath, Scope, Binding } from 'babel-traverse'
 const template = require('babel-template')
 const _ = require('lodash')
 
+class DiffRecordSet<T> extends Set<T> {
+  constructor (arr= []) {
+    super(arr)
+  }
+
+  private records = new Map()
+
+  recordAdd (maybeOldEle, newAddedEle) {
+    if (this.has(maybeOldEle)) {
+      this.delete(maybeOldEle)
+      this.records.set(maybeOldEle, newAddedEle)
+    }
+    this.add(newAddedEle)
+  }
+
+  popRecords () {
+    const temp = this.records
+    this.records = new Map()
+    return temp
+  }
+
+}
+
 /* GAI:16
 */
 export default function ejectUIFragMethod (classBodyPath: NodePath<t.ClassBody>): t.Identifier[] {
@@ -18,9 +41,19 @@ export default function ejectUIFragMethod (classBodyPath: NodePath<t.ClassBody>)
     return methodPath
   }
 
-  const identifierCollection: Set<string> = new Set() // 收集一个类中的变量重命名后的变量， 基于重命名不会重复的原理进行替换去重
+  const identifierCollection: DiffRecordSet<string> = new DiffRecordSet() // 收集一个类中的变量重命名后的变量， 基于重命名不会重复的原理进行替换去重
   const uIFragMethodSet2Delete: Set<NodePath<any>> = new Set()
-  classBodyPath.traverse({
+
+  nestCall(classBodyPath , findMethodByName, uIFragMethodSet2Delete , identifierCollection)
+
+  methodMap = null as any
+  // clear uIFragMethodQueue
+  uIFragMethodSet2Delete.forEach(del => del.remove())
+  return [...identifierCollection].map(id => t.identifier(id))
+}
+
+function nestCall (statePath: NodePath<t.Node> , findMethodByName, uIFragMethodSet2Delete , identifierCollection) {
+  statePath.traverse({
     CallExpression (path: NodePath<t.CallExpression>) {
 
       const callee = path.get('callee')
@@ -35,17 +68,14 @@ export default function ejectUIFragMethod (classBodyPath: NodePath<t.ClassBody>)
 
         if (methodPath && isUIFragMethod(methodPath)) {
           uIFragMethodSet2Delete.add(methodPath)
+          // 需要深度优先遍历到最内的方法处理完后在一次处理上层调用
+          nestCall(methodPath , findMethodByName, uIFragMethodSet2Delete , identifierCollection)
           ejectMethod(path,
             methodPath.isClassMethod() ? methodPath : methodPath.get('value') , identifierCollection)
         }
       }
     }
   })
-
-  methodMap = null as any
-  // clear uIFragMethodQueue
-  uIFragMethodSet2Delete.forEach(del => del.remove())
-  return [...identifierCollection].map(id => t.identifier(id))
 }
 
 /*
@@ -58,7 +88,7 @@ export default function ejectUIFragMethod (classBodyPath: NodePath<t.ClassBody>)
   6 就近插入到调用法所在scope
   7 用方法的 return内容替换函数调用
 */
-function ejectMethod (callExpPath: NodePath<t.CallExpression>, methodPath: NodePath<t.Function> , identifierCollection: Set<string> = new Set()) {
+function ejectMethod (callExpPath: NodePath<t.CallExpression>, methodPath: NodePath<t.Function> , identifierCollection: DiffRecordSet<string> = new DiffRecordSet()) {
 
   // const identifierCollection: Set<string> = new Set()
   const methodParamsPathArr: Array<NodePath<any>> = methodPath.get('params') as any
@@ -86,9 +116,7 @@ function ejectMethod (callExpPath: NodePath<t.CallExpression>, methodPath: NodeP
 
     return buildConstVariableDeclaration(paramDef , rightexp)
   })
-  // let varDeclarations = (callExpPath.get('arguments') as any).map((paramVal, index) => {
-  //   return buildConstVariableDeclaration(newMethodParamNames[index] , paramVal.node)
-  // })
+
   // 获取原方法中return之前的一些语句
   const methodBody = methodPath.get('body')
   const statementsArr = (methodBody.isBlockStatement() ? methodBody.get('body') as any : [])
@@ -119,13 +147,20 @@ function ejectMethod (callExpPath: NodePath<t.CallExpression>, methodPath: NodeP
   const blockStatementWhereFunIsCalled = (callExpPath.scope.block as any).body
   const insertPosition = blockStatementWhereFunIsCalled.body.indexOf(callExpPath.getStatementParent().node)
   Array.prototype.splice.apply(blockStatementWhereFunIsCalled.body, [insertPosition, 0].concat(varDeclarations))
-// 重新注册新加的声明到binding中
+  // 重新注册新加的声明到binding中
   const blockStatementPath = callExpPath.scope.path.get('body');
   (blockStatementPath.get('body') as any).forEach(mayBeDecl => {
     if (mayBeDecl.isVariableDeclaration()) {
       callExpPath.scope.registerDeclaration(mayBeDecl)
     }
   })
+
+  // const redoRename = identifierCollection.popRecords()
+  // if (redoRename.size) { // 补偿深度调用嵌套时 变量rename不成功的问题
+  //   for (let [oldV, newV] of redoRename) {
+  //     methodBody.scope.hasBinding(oldV) && methodBody.scope.rename(oldV, newV)
+  //   }
+  // }
 
   // 方法return部分替换调用
   callExpPath.replaceWith(_.cloneDeep(methodReturnPath))
@@ -135,7 +170,7 @@ function ejectMethod (callExpPath: NodePath<t.CallExpression>, methodPath: NodeP
 /* 将解构参数的变量重新命名
   collector 用于收集改动过的新变量
 */
-function exploreVarDefInPattern (patternPath: NodePath<t.Pattern>, scope: Scope, collector: Set<string> = new Set()) {
+function exploreVarDefInPattern (patternPath: NodePath<t.Pattern>, scope: Scope, collector: DiffRecordSet<string> = new DiffRecordSet()) {
   if (patternPath.isAssignmentPattern()) {
     /*  const newPname =  */_renameIdentifier(patternPath.get('left') as any, scope , collector)
   } else {
@@ -162,7 +197,7 @@ function exploreVarDefInPattern (patternPath: NodePath<t.Pattern>, scope: Scope,
 /* 返回新的改名后的左边表达式变量， 用于构成新的变量定义
   包含 identifier   pattern
 */
-function varDefinationRenamer (defPath: NodePath<t.LVal>, scope: Scope, newNameCollector: Set<string> = new Set()) {
+function varDefinationRenamer (defPath: NodePath<t.LVal>, scope: Scope, newNameCollector: DiffRecordSet<string> = new DiffRecordSet()) {
   if (defPath.isPattern()) {
     exploreVarDefInPattern(defPath, scope, newNameCollector)
     return _.cloneDeep(defPath.node)
@@ -180,12 +215,12 @@ function varDefinationRenamer (defPath: NodePath<t.LVal>, scope: Scope, newNameC
   }
 }
 
-function _renameIdentifier (idPath: NodePath<t.Identifier>, scope: Scope , newNameCollector: Set<string> = new Set()): string {
+function _renameIdentifier (idPath: NodePath<t.Identifier>, scope: Scope , newNameCollector: DiffRecordSet<string> = new DiffRecordSet()): string {
   const oldparamName = idPath.node.name
   const newParamName = `${oldparamName}${scope.generateUid()}`
-  idPath.scope.rename(oldparamName, newParamName)
-  newNameCollector.delete(oldparamName)
-  newNameCollector.add(newParamName)
+  // idPath.scope.rename(oldparamName, newParamName)
+  idPath.getFunctionParent().scope.rename(oldparamName, newParamName)
+  newNameCollector.recordAdd(oldparamName , newParamName)
   return newParamName
 }
 

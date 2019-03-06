@@ -26,202 +26,216 @@ class DiffRecordSet<T> extends Set<T> {
 
 }
 
-/* GAI:16
-*/
-export default function ejectUIFragMethod (classBodyPath: NodePath<t.ClassBody>): t.Identifier[] {
-  let methodMap = new Map()
+export class Ejector {
 
-  function findMethodByName (methodName) {
-    if (methodMap.has(methodName)) {
-      return methodMap.get(methodName)
+  private methodMap = new Map()
+  // 收集一个类中的变量重命名后的变量， 基于重命名不会重复的原理进行替换去重,放到state中
+  private identifierCollection: DiffRecordSet<string> = new DiffRecordSet()
+  private uIFragMethodSet2Delete: Set<NodePath<any>> = new Set()
+  private root: NodePath<t.ClassBody>
+
+  constructor (root: NodePath<t.ClassBody>) {
+    this.root = root
+    this.nestCallExplorer(root)
+    this._clear()
+  }
+
+  _clear () {
+
+    this.methodMap = null as any
+    // clear uIFragMethodQueue
+    this.uIFragMethodSet2Delete.forEach(del => del.remove())
+  }
+
+  getIdentifiersShouldInState () {
+    return [...this.identifierCollection].map(id => t.identifier(id))
+  }
+
+  findMethodByName (methodName) {
+    if (this.methodMap.has(methodName)) {
+      return this.methodMap.get(methodName)
     }
-    const clazElemsPath = classBodyPath.get('body')
+    const clazElemsPath = this.root.get('body')
     const methodPath = clazElemsPath.find(prop => (prop.isClassMethod() || prop.isClassProperty()) && prop.get('key').isIdentifier({ name: methodName }))
-    methodMap.set(methodName,methodPath)
+    this.methodMap.set(methodName,methodPath)
     return methodPath
   }
 
-  const identifierCollection: DiffRecordSet<string> = new DiffRecordSet() // 收集一个类中的变量重命名后的变量， 基于重命名不会重复的原理进行替换去重
-  const uIFragMethodSet2Delete: Set<NodePath<any>> = new Set()
+  nestCallExplorer (toBeExplore: NodePath<t.Node>) {
+    toBeExplore.traverse({
+      CallExpression: (path: NodePath<t.CallExpression>) => {
 
-  nestCall(classBodyPath , findMethodByName, uIFragMethodSet2Delete , identifierCollection)
+        const callee = path.get('callee')
 
-  methodMap = null as any
-  // clear uIFragMethodQueue
-  uIFragMethodSet2Delete.forEach(del => del.remove())
-  return [...identifierCollection].map(id => t.identifier(id))
-}
+        if (
+          callee.isMemberExpression()
+          && callee.get('object').isThisExpression()
+        ) {
+          const methodName = (callee.get('property').node as t.Identifier).name
+          const methodPath = this.findMethodByName(methodName)
+          // const renderPath = findMethodByName('render')
 
-function nestCall (statePath: NodePath<t.Node> , findMethodByName, uIFragMethodSet2Delete , identifierCollection) {
-  statePath.traverse({
-    CallExpression (path: NodePath<t.CallExpression>) {
-
-      const callee = path.get('callee')
-
-      if (
-        callee.isMemberExpression()
-        && callee.get('object').isThisExpression()
-      ) {
-        const methodName = (callee.get('property').node as t.Identifier).name
-        const methodPath = findMethodByName(methodName)
-        // const renderPath = findMethodByName('render')
-
-        if (methodPath && isUIFragMethod(methodPath)) {
-          uIFragMethodSet2Delete.add(methodPath)
-          // 需要深度优先遍历到最内的方法处理完后在一次处理上层调用
-          nestCall(methodPath , findMethodByName, uIFragMethodSet2Delete , identifierCollection)
-          ejectMethod(path,
-            methodPath.isClassMethod() ? methodPath : methodPath.get('value') , identifierCollection)
+          if (methodPath && isUIFragMethod(methodPath)) {
+            this.uIFragMethodSet2Delete.add(methodPath)
+            // 需要深度优先遍历到最内的方法处理完后在一次处理上层调用
+            this.nestCallExplorer(methodPath)
+            this.ejectMethod(path, methodPath.isClassMethod() ? methodPath : methodPath.get('value'))
+          }
         }
       }
-    }
-  })
-}
-
-/*
-  替换方法内容体到调用的地方
-  1 获取方法参数 重命名
-  2 获取调用处使用的变量
-  3 将1-2中的内容组成var声明 （如果定义处和调用处参数个数不匹配，需要包含默认参数的赋值声明）
-  4  把方法中的其他声明 改名字防止冲突
-  5 把方法中的其他声明也提取 接到3中声明之后
-  6 就近插入到调用法所在scope
-  7 用方法的 return内容替换函数调用
-*/
-function ejectMethod (callExpPath: NodePath<t.CallExpression>, methodPath: NodePath<t.Function> , identifierCollection: DiffRecordSet<string> = new DiffRecordSet()) {
-
-  // const identifierCollection: Set<string> = new Set()
-  const methodParamsPathArr: Array<NodePath<any>> = methodPath.get('params') as any
-  const methodReturnPath = assertOneReturn(methodPath)
-  // 获取定义处参数的名字
-  const newMethodParamNames = methodParamsPathArr.map((param) => {
-    return varDefinationRenamer(param,callExpPath.scope, identifierCollection)
-  })
-
-  // 获取调用处传入的参数 组成参数定义
-  const params = callExpPath.node.arguments
-  let varDeclarations = newMethodParamNames.map((paramDef,index) => {
-    const rightexp = params[index]
-
-    if (t.isAssignmentPattern(paramDef)) {
-      return template(`const LEFT = RIGHT || DEFAULT`)({
-        LEFT: paramDef.left,
-        RIGHT: rightexp ? rightexp : t.nullLiteral(),
-        DEFAULT: paramDef.right
-      })
-    }
-    if (t.isRestElement(paramDef)) {
-      return buildConstVariableDeclaration(paramDef.argument , t.arrayExpression(params.slice(index)))
-    }
-
-    return buildConstVariableDeclaration(paramDef , rightexp)
-  })
-
-  // 获取原方法中return之前的一些语句
-  const methodBody = methodPath.get('body')
-  const statementsArr = (methodBody.isBlockStatement() ? methodBody.get('body') as any : [])
-    .filter(dec => !dec.isReturnStatement()).map(decpath => {
-      if (decpath.isVariableDeclaration()) {
-        // 变量换名字
-        decpath.get('declarations').forEach(varDeclarator => {
-          const oldId = varDeclarator.get('id')
-
-          return varDefinationRenamer(oldId , callExpPath.scope , identifierCollection)
-        })
-      } else if (
-        !(
-          decpath.isSwitchStatement()
-          || decpath.isIfStatement()
-          || decpath.isExpressionStatement()
-          || decpath.isBlockStatement()
-          || decpath.isFunctionExpression()
-        )
-      ) {
-        throw new Error('该类型的申明未实现')
-      }
-      return decpath.node
     })
-  // 所有的额外定义都需要添加到 调用法最进的方法定义出
-  varDeclarations = varDeclarations.concat(statementsArr)
-  // 添加这些变量申明到该调用所属的scope中， 位置最靠近调用方， 防止在申明前就使用变量
-  const blockStatementWhereFunIsCalled = (callExpPath.scope.block as any).body
-  const insertPosition = blockStatementWhereFunIsCalled.body.indexOf(callExpPath.getStatementParent().node)
-  Array.prototype.splice.apply(blockStatementWhereFunIsCalled.body, [insertPosition, 0].concat(varDeclarations))
-  // 重新注册新加的声明到binding中
-  const blockStatementPath = callExpPath.scope.path.get('body');
-  (blockStatementPath.get('body') as any).forEach(mayBeDecl => {
-    if (mayBeDecl.isVariableDeclaration()) {
-      callExpPath.scope.registerDeclaration(mayBeDecl)
-    }
-  })
 
-  // const redoRename = identifierCollection.popRecords()
-  // if (redoRename.size) { // 补偿深度调用嵌套时 变量rename不成功的问题
-  //   for (let [oldV, newV] of redoRename) {
-  //     methodBody.scope.hasBinding(oldV) && methodBody.scope.rename(oldV, newV)
-  //   }
-  // }
-
-  // 方法return部分替换调用
-  callExpPath.replaceWith(_.cloneDeep(methodReturnPath))
-
-}
-
-/* 将解构参数的变量重新命名
-  collector 用于收集改动过的新变量
-*/
-function exploreVarDefInPattern (patternPath: NodePath<t.Pattern>, scope: Scope, collector: DiffRecordSet<string> = new DiffRecordSet()) {
-  if (patternPath.isAssignmentPattern()) {
-    /*  const newPname =  */_renameIdentifier(patternPath.get('left') as any, scope , collector)
-  } else {
-    let elepaths: Array<NodePath<any>> = []
-    if (patternPath.isArrayPattern()) {
-      elepaths = patternPath.get('elements') as any
-    } else if (patternPath.isObjectPattern()) {
-      elepaths = (patternPath.get('properties') as any).map(ele => {
-        if (ele.isObjectProperty()) {
-          return ele.get('value')
-        }
-        return ele
-      })
-    } else {
-      throw new Error('在renamePatternParam 方法中 发现未知类型参数')
-    }
-
-    elepaths.forEach(elePath => {
-      varDefinationRenamer(elePath as NodePath<t.LVal>, scope, collector)
-    })
   }
 
-}
-/* 返回新的改名后的左边表达式变量， 用于构成新的变量定义
-  包含 identifier   pattern
-*/
-function varDefinationRenamer (defPath: NodePath<t.LVal>, scope: Scope, newNameCollector: DiffRecordSet<string> = new DiffRecordSet()) {
-  if (defPath.isPattern()) {
-    exploreVarDefInPattern(defPath, scope, newNameCollector)
-    return _.cloneDeep(defPath.node)
-  } else {
-    if (defPath.isIdentifier()) {
-      const newPname = _renameIdentifier(defPath, scope, newNameCollector)
-      return t.identifier(newPname)
-    } else if (defPath.isRestElement() || defPath.isRestProperty()) {
-      const toRenamePath = defPath.get('argument') as any
-      /* const newPname = */ _renameIdentifier(toRenamePath, scope, newNameCollector)
+  /*
+    替换方法内容体到调用的地方
+    1 获取方法参数 重命名
+    2 获取调用处使用的变量
+    3 将1-2中的内容组成var声明 （如果定义处和调用处参数个数不匹配，需要包含默认参数的赋值声明）
+    4  把方法中的其他声明 改名字防止冲突
+    5 把方法中的其他声明也提取 接到3中声明之后
+    6 就近插入到调用法所在scope
+    7 用方法的 return内容替换函数调用
+  */
+  ejectMethod (callExpPath: NodePath<t.CallExpression>, methodPath: NodePath<t.Function>) {
+
+    // const identifierCollection: Set<string> = new Set()
+    const methodParamsPathArr: Array<NodePath<any>> = methodPath.get('params') as any
+    const methodReturnPath = assertOneReturn(methodPath)
+    // 获取定义处参数的名字
+    const newMethodParamNames = methodParamsPathArr.map((param) => {
+      return this.varDefinationRenamer(param, callExpPath.scope)
+    })
+
+    // 获取调用处传入的参数 组成参数定义
+    const params = callExpPath.node.arguments
+    let varDeclarations = newMethodParamNames.map((paramDef, index) => {
+      const rightexp = params[index]
+
+      if (t.isAssignmentPattern(paramDef)) {
+        return template(`const LEFT = RIGHT || DEFAULT`)({
+          LEFT: paramDef.left,
+          RIGHT: rightexp ? rightexp : t.nullLiteral(),
+          DEFAULT: paramDef.right
+        })
+      }
+      if (t.isRestElement(paramDef)) {
+        return buildConstVariableDeclaration(paramDef.argument, t.arrayExpression(params.slice(index)))
+      }
+
+      return buildConstVariableDeclaration(paramDef, rightexp)
+    })
+
+    // 获取原方法中return之前的一些语句
+    const methodBody = methodPath.get('body')
+    const statementsArr = (methodBody.isBlockStatement() ? methodBody.get('body') as any : [])
+      .filter(dec => !dec.isReturnStatement()).map(decpath => {
+        if (decpath.isVariableDeclaration()) {
+          // 变量换名字
+          decpath.get('declarations').forEach(varDeclarator => {
+            const oldId = varDeclarator.get('id')
+
+            return this.varDefinationRenamer(oldId, callExpPath.scope)
+          })
+        } else if (
+          !(
+            decpath.isSwitchStatement()
+            || decpath.isIfStatement()
+            || decpath.isExpressionStatement()
+            || decpath.isBlockStatement()
+            || decpath.isFunctionExpression()
+          )
+        ) {
+          throw new Error('该类型的申明未实现')
+        }
+        return decpath.node
+      })
+    // 所有的额外定义都需要添加到 调用法最进的方法定义出
+    varDeclarations = varDeclarations.concat(statementsArr)
+    // 添加这些变量申明到该调用所属的scope中， 位置最靠近调用方， 防止在申明前就使用变量
+    const blockStatementWhereFunIsCalled = (callExpPath.scope.block as any).body
+    const insertPosition = blockStatementWhereFunIsCalled.body.indexOf(callExpPath.getStatementParent().node)
+    Array.prototype.splice.apply(blockStatementWhereFunIsCalled.body, [insertPosition, 0].concat(varDeclarations))
+    // 重新注册新加的声明到binding中
+    const blockStatementPath = callExpPath.scope.path.get('body');
+    (blockStatementPath.get('body') as any).forEach(mayBeDecl => {
+      if (mayBeDecl.isVariableDeclaration()) {
+        callExpPath.scope.registerDeclaration(mayBeDecl)
+      }
+    })
+
+    // 方法return部分替换调用
+    callExpPath.replaceWith(_.cloneDeep(methodReturnPath))
+
+  }
+
+  /* 返回新的改名后的左边表达式变量， 用于构成新的变量定义
+   包含 identifier   pattern
+ */
+  varDefinationRenamer (defPath: NodePath<t.LVal>, scope: Scope) {
+    if (defPath.isPattern()) {
+      this.exploreVarDefInPattern(defPath, scope)
       return _.cloneDeep(defPath.node)
     } else {
-      throw new Error('在varDefinationRenamer 方法中 发现未知类型')
+      if (defPath.isIdentifier()) {
+        const newPname = this._renameIdentifier(defPath, scope)
+        return t.identifier(newPname)
+      } else if (defPath.isRestElement() || defPath.isRestProperty()) {
+        const toRenamePath = defPath.get('argument') as any
+        this._renameIdentifier(toRenamePath, scope)
+        return _.cloneDeep(defPath.node)
+      } else {
+        throw new Error('在varDefinationRenamer 方法中 发现未知类型')
+      }
     }
   }
+
+  /* 将解构参数的变量重新命名
+  collector 用于收集改动过的新变量
+*/
+  exploreVarDefInPattern (patternPath: NodePath<t.Pattern>, scope: Scope) {
+    if (patternPath.isAssignmentPattern()) {
+      this._renameIdentifier(patternPath.get('left') as any, scope)
+    } else {
+      let elepaths: Array<NodePath<any>> = []
+      if (patternPath.isArrayPattern()) {
+        elepaths = patternPath.get('elements') as any
+      } else if (patternPath.isObjectPattern()) {
+        elepaths = (patternPath.get('properties') as any).map(ele => {
+          if (ele.isObjectProperty()) {
+            return ele.get('value')
+          }
+          return ele
+        })
+      } else {
+        throw new Error('在renamePatternParam 方法中 发现未知类型参数')
+      }
+
+      elepaths.forEach(elePath => {
+        this.varDefinationRenamer(elePath as NodePath<t.LVal>, scope)
+      })
+    }
+
+  }
+
+  _renameIdentifier (idPath: NodePath<t.Identifier>, scope: Scope): string {
+    const oldparamName = idPath.node.name
+    const newParamName = `${oldparamName}${scope.generateUid()}`
+    // idPath.scope.rename(oldparamName, newParamName)
+    const funcParent = idPath.getFunctionParent()
+    funcParent.scope.rename(oldparamName, newParamName)
+    if (funcParent.isClassMethod() && funcParent.get('key').isIdentifier({ name: 'render' })) {
+      this.identifierCollection.recordAdd(oldparamName, newParamName)
+    }
+    return newParamName
+  }
+
 }
 
-function _renameIdentifier (idPath: NodePath<t.Identifier>, scope: Scope , newNameCollector: DiffRecordSet<string> = new DiffRecordSet()): string {
-  const oldparamName = idPath.node.name
-  const newParamName = `${oldparamName}${scope.generateUid()}`
-  // idPath.scope.rename(oldparamName, newParamName)
-  idPath.getFunctionParent().scope.rename(oldparamName, newParamName)
-  newNameCollector.recordAdd(oldparamName , newParamName)
-  return newParamName
+/* GAI:16
+*/
+export default function ejectUIFragMethod (classBodyPath: NodePath<t.ClassBody>): t.Identifier[] {
+  return new Ejector(classBodyPath).getIdentifiersShouldInState()
 }
 
 export function isUIFragMethod (methodPath) {

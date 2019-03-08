@@ -825,7 +825,8 @@ export class RenderParser {
             } else if (THIRD_PARTY_COMPONENTS.has(componentName)) {
               path.node.name = t.jSXIdentifier('bind' + name.name[2].toLowerCase() + name.name.slice(3))
             } else {
-              path.node.name = t.jSXIdentifier('bind' + name.name.toLowerCase())
+              const newName = findPropName(componentName, name.name ,eventShouldBeCatched)
+              path.node.name = t.jSXIdentifier(newName || ('bind' + name.name.toLowerCase())
             }
           }
           // let transformName = `${eventShouldBeCatched ? 'catch' : 'bind'}` + name.name.slice(2, name.name.length)

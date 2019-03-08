@@ -23,12 +23,17 @@ const CompPropNameReplaceRule = {
 
 }
 
+const COMMON_PROP_MAP = {
+  onPress
+}
+
 export default function findPropName (
   compName: string,
   propName: string,
   eventShouldBeCatched: boolean = false
 ) {
-  const set = CompPropNameReplaceRule[compName]
+  // 如果没有精准定义的组件配置，则使用默认的配置
+  const set = CompPropNameReplaceRule[compName] || COMMON_PROP_MAP[propName]
   if (!set) return null
   const trans = set[propName]
   if (!trans) return null

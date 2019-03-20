@@ -243,7 +243,7 @@ export function getElementById (component, id, type) {
     res = res ? (res.$component || res) : null
   } else {
     const query = wx.createSelectorQuery().in(component)
-    res = query.select(id)
+    res = query.select(`#${id}`)
   }
 
   if (res) return res

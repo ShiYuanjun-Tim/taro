@@ -23,7 +23,8 @@ export const eslintValidation: () => {
   return {
     visitor: {
       Program : {
-        exit (_, state) {
+        exit (_/* , state */) {
+          // 不直接处理未修改的源码 而是选择处理修改过的ast生成的代码
           // const { file: { code } } = state
           const code = generate(_.node).code
           const report = cli.executeOnText(code)

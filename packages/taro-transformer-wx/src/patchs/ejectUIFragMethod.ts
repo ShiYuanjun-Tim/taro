@@ -232,7 +232,8 @@ export class Ejector {
 
 }
 
-/* GAI:16
+/*
+GAI:16
 */
 export default function ejectUIFragMethod (classBodyPath: NodePath<t.ClassBody>): t.Identifier[] {
   return new Ejector(classBodyPath).getIdentifiersShouldInState()

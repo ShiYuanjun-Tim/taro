@@ -1,6 +1,6 @@
 export default  class ListView {
   public static DataSource = class {
-    cloneWithRows(dataBlob, rowIdentities){ return dataBlob }
+    cloneWithRows(dataBlob/* , rowIdentities */){ return dataBlob }
     cloneWithRowsAndSections(){throw new Error('to be implement if necessary')}
     getRowCount(){throw new Error('to be implement if necessary')}
     getRowAndSectionCount(){throw new Error('to be implement if necessary')}

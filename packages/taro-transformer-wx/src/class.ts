@@ -693,9 +693,11 @@ class Transformer {
   }
 
   compile () {
+
     // GAI:16
     const initIdentifiersInState: t.Identifier[] = ejectUIFragMethod(this.classPath.get('body') as NodePath<t.ClassBody>)
     this.jsxReferencedIdentifiers = new Set(initIdentifiersInState)
+
     this.traverse()
     this.setComponents()
     this.resetConstructor()

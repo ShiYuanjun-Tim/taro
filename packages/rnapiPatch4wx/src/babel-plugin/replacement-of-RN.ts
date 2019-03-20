@@ -5,6 +5,7 @@ import * as template from 'babel-template'
 // import generate from 'babel-generator'
 import {turnRequireLocalImgToBase64Str} from "../patchs/imagePatch"
 import listViewTransformer from "../patchs/ListViewPatch"
+import patchLayoutEvtHandler , {appendRefAttr , changeRefAttr} from "../patchs/layoutEvtPatch"
 declare const exports:any;
 declare const module:any;
 
@@ -28,8 +29,8 @@ const conversionMap = {
 
 }
 
-function remove (path: NodePath<t.ImportSpecifier>) {
-  console.log(`react-native[${path.node.imported.name}] is removed`)
+function remove (/* path: NodePath<t.ImportSpecifier> */) {
+  // console.log(`react-native[${path.node.imported.name}] is removed`)
   return
 }
 
@@ -74,6 +75,10 @@ exports.default = function() {
     visitor: {
       // make sure run before the eslint
       Program(programPath, state) {
+
+        // 是否已经给当前类patch 过layout需要的一些方法
+        let layoutPatched =false
+
         programPath.traverse({
           ImportDeclaration: function conversionOfReactNativeImport (path: NodePath<t.ImportDeclaration>) {
             const depName = path.node.source.value
@@ -146,16 +151,60 @@ exports.default = function() {
               }
             }
           },
-          JSXOpeningElement(path) {
+          JSXOpeningElement(path: NodePath<t.JSXOpeningElement>) {
             const { name } = path.node.name as t.JSXIdentifier
-    
+
             if (name === 'ListView') {
               listViewTransformer(path)
             }
             // if (name === 'ScrollView') {
             //   scrollViewTransformer(path)
             // }
-          }
+
+
+
+            let hasOnLayoutAttr = false
+            let hasRefAttr = false
+            let isRefStr =false
+            let refAttrPath
+            path.traverse({
+              JSXAttribute(attrPath: NodePath<t.JSXAttribute>) {
+
+                const attrNamePath = attrPath.get('name')
+                if (attrNamePath.isJSXIdentifier({ name: 'onLayout' })) {
+                  hasOnLayoutAttr = true
+                  const clsbody = path.findParent(p => p.isClassBody())
+                  if (clsbody && !layoutPatched) {
+                    layoutPatched = true;
+                    patchLayoutEvtHandler(clsbody);
+                  }
+                } else if (attrNamePath.isJSXIdentifier({ name: 'ref' })) {
+                  hasRefAttr = true
+                  refAttrPath= attrPath
+                  // 检测ref是字符串的情况，应该报错 保证其他功能正常
+                  const refVal  = attrPath.get('value')
+                  if(refVal.isStringLiteral() || refVal.get('expression').isStringLiteral()){
+                    isRefStr = true 
+                  }
+                }
+
+              }
+            })
+
+            if(hasOnLayoutAttr && isRefStr) {
+              // 有layout事件 并且还存在ref为str的形式
+              throw new Error(`文件 ${state.opts.filepath} 中存在【 有layout事件 并且还存在ref为str的形式】，请使用回调式ref` )
+            }
+
+            if (hasOnLayoutAttr) {
+              if(!hasRefAttr) {
+                appendRefAttr(path)
+              }else{
+                changeRefAttr(path , refAttrPath)
+              }
+            }
+          },
+
         })
       }
     },

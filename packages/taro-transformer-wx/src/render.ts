@@ -1111,7 +1111,7 @@ export class RenderParser {
         const refDeclName = '__ref'
         const args: any[] = [
           t.identifier('__scope'),
-          id
+          t.binaryExpression('+', t.stringLiteral('#'), id)
         ]
         if (ref.type === 'component') {
           args.push(t.stringLiteral('component'))

@@ -154,7 +154,7 @@ class Transformer {
     const componentName = (openingElePath.node.name as t.JSXIdentifier).name
     const buildReuqire = template(
       `(ref) => {
-        Object.assign(ref , REF_PATCH);
+        ref && Object.assign(ref , REF_PATCH);
         const refs = this.refs || {}
         refs[REF_NAME] = ref
         this.refs = refs
@@ -175,7 +175,7 @@ class Transformer {
 
     const buildReuqire = template(
       `(ref) => {
-        Object.assign(ref , REF_PATCH);
+        ref && Object.assign(ref , REF_PATCH);
        ( ORIGIN_FUN )(ref)
       }
       `

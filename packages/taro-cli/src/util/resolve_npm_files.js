@@ -126,9 +126,15 @@ function parseAst (ast, filePath, files, isProduction, npmConfig, buildAdapter =
                 return
               }
 
+              if (path.isAbsolute(requirePath)) {
+                const requireReplacement = path.relative(path.dirname(filePath), requirePath)
+                requireReplacement
+                args.replaceWith(t.stringLiteral(requireReplacement))
+                requirePath = requireReplacement
+              }
               const requiredSource = path.resolve(path.dirname(filePath), requirePath)
               if (skipRemoveRule.some(rule => requiredSource.match(rule) !== null)) {
-                console.log(`skip 解析 ${requiredSource} from ${filePath}`)
+                console.log(`跳过  不解析 ${requiredSource} from ${filePath}`)
                 const statementPath = astPath.getStatementParent()
                 if (statementPath.isVariableDeclaration()) {
                   statementPath.get('declarations.0.init').replaceWith(t.objectExpression([]))

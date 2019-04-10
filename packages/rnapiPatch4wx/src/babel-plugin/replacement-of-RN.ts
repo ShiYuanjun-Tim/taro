@@ -129,7 +129,7 @@ exports.default = function() {
                   const varNamePath = path.getSibling('id') || path.getSibling('left')
                   const varName = varNamePath.node.name
                   const toInsert = template(`
-                  const _wechatAdapter = require('axios-miniprogram-adapter');
+                  var _wechatAdapter = require('axios-miniprogram-adapter');
                   ${varName}.default.defaults.adapter = _wechatAdapter;
                   `)()
                   path.getStatementParent().insertAfter(toInsert)

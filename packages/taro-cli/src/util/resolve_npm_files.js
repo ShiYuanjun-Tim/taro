@@ -304,11 +304,15 @@ async function recursiveRequire (filePath, files, isProduction, npmConfig = {}, 
       }
     }
     fs.ensureDirSync(path.dirname(outputNpmPath))
-    fs.writeFileSync(outputNpmPath, fileContent)
-    let modifyOutput = outputNpmPath.replace(basedir + path.sep, '')
-    modifyOutput = modifyOutput.split(path.sep).join('/')
-    printLog(pocessTypeEnum.COPY, 'NPM文件', modifyOutput)
-    copyedFiles[outputNpmPath] = true
+    if (path.dirname(outputNpmPath) !== process.cwd()) {
+      fs.writeFileSync(outputNpmPath, fileContent)
+      let modifyOutput = outputNpmPath.replace(basedir + path.sep, '')
+      modifyOutput = modifyOutput.split(path.sep).join('/')
+      printLog(pocessTypeEnum.COPY, 'NPM文件', modifyOutput)
+      copyedFiles[outputNpmPath] = true
+    } else {
+      console.log('跳过', '', '文件拷贝', '', outputNpmPath + '在项目直接目录下的文件，不是微信使用的文件，不该被处理')
+    }
   }
 }
 

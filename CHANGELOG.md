@@ -1,5 +1,89 @@
 <a name=""></a>
-# [](https://github.com/NervJS/taro/compare/v1.2.1...v) (2018-12-21)
+# [](https://github.com/NervJS/taro/compare/v1.2.2-3...v) (2019-04-11)
+
+
+
+<a name="1.2.2-3"></a>
+## [1.2.2-3](https://github.com/NervJS/taro/compare/v1.2.2-2...v1.2.2-3) (2019-04-11)
+
+
+
+<a name="1.2.2-2"></a>
+## [1.2.2-2](https://github.com/NervJS/taro/compare/v1.2.2-1...v1.2.2-2) (2019-04-11)
+
+
+
+<a name="1.2.2-1"></a>
+## [1.2.2-1](https://github.com/NervJS/taro/compare/v1.2.2-0...v1.2.2-1) (2019-04-11)
+
+
+
+<a name="1.2.2-0"></a>
+## [1.2.2-0](https://github.com/NervJS/taro/compare/v1.2.1...v1.2.2-0) (2019-04-11)
+
+
+### Bug Fixes
+
+* **178line:** fix ([2a67b97](https://github.com/NervJS/taro/commit/2a67b97))
+* **cli:** mobx 模板无法通过 TypeScript 类型检测 ([3873d73](https://github.com/NervJS/taro/commit/3873d73))
+* **cli:** 路径解析错误 ([0e32087](https://github.com/NervJS/taro/commit/0e32087))
+* **cli:** 项目更目录下的文件不可以处理 ([17bcfe4](https://github.com/NervJS/taro/commit/17bcfe4))
+* **eject:** 深嵌套情况下的命名混乱 ([6846cff](https://github.com/NervJS/taro/commit/6846cff))
+* **rnapi4wx:** tsc error ([6136972](https://github.com/NervJS/taro/commit/6136972))
+* **tarns-wx:** ts 类型报错问题 ([370f77c](https://github.com/NervJS/taro/commit/370f77c))
+* **taro:** 百分比字符串不能加单位 ([5045322](https://github.com/NervJS/taro/commit/5045322))
+* **taro-components:** 修复 swiper pagination 匹配错乱问题 ([c77348b](https://github.com/NervJS/taro/commit/c77348b))
+* **trans:** eject修复死变量名，支持...param 和默认参数形式 ([e225b48](https://github.com/NervJS/taro/commit/e225b48))
+* **trans:** 提供一般属性的匹配，不用组件和属性严格匹配 ([b57753d](https://github.com/NervJS/taro/commit/b57753d))
+* **trans:** 重构代码 ([9dac276](https://github.com/NervJS/taro/commit/9dac276))
+* **trans-wx:** getElementById的ID入参要自带‘#’ 不该由这个方法提供 ([11dcae3](https://github.com/NervJS/taro/commit/11dcae3))
+* **trans-wx:** require中的资源base64编码时 会对是否图片进行判断 ([79014ac](https://github.com/NervJS/taro/commit/79014ac))
+* **trans-wx:** 样式单位待商榷 ([afc8614](https://github.com/NervJS/taro/commit/afc8614))
+* **trans-wx:** 样式单位用rpx替换px ([06f1259](https://github.com/NervJS/taro/commit/06f1259))
+* **trans-wx:** 防止组件unmount的时候传递null导致错误 ([8679f82](https://github.com/NervJS/taro/commit/8679f82))
+* **transformer:** if block 中设置一个没有初始值的变量报错 ([213b29e](https://github.com/NervJS/taro/commit/213b29e))
+* **wx:**  输出代码需要es5版本 ([4a61480](https://github.com/NervJS/taro/commit/4a61480))
+
+
+### Features
+
+* gai-1/ gai-2 ([0702e13](https://github.com/NervJS/taro/commit/0702e13))
+* **trans-wx:** 提供全局css文件 支持 import * as React ([fc34e8a](https://github.com/NervJS/taro/commit/fc34e8a))
+* gai-3 ([1eebb67](https://github.com/NervJS/taro/commit/1eebb67))
+* **cli:**  修复 ([e8847d3](https://github.com/NervJS/taro/commit/e8847d3))
+* **cli:** make skipRemoveRule configrable ([7b6f313](https://github.com/NervJS/taro/commit/7b6f313))
+* **cli:** 提供绝对路径转相对路径的支持 ([6b667fa](https://github.com/NervJS/taro/commit/6b667fa))
+* **eflow:** 数据在实例化时候就提供，实例提供新字段 _transient_ ([e498a27](https://github.com/NervJS/taro/commit/e498a27))
+* **patch:** 改写 _createData 使eflow中 ([4ea934f](https://github.com/NervJS/taro/commit/4ea934f))
+* **patch:** 添加addStyle防止代码分叉 添加重载方法签名 ([034cda2](https://github.com/NervJS/taro/commit/034cda2))
+* **rnap4wx:** rn组件的替换插件化 ([4e1d1fb](https://github.com/NervJS/taro/commit/4e1d1fb))
+* **rnap4wx:** 添加项目rnap4wx ([d1a6efc](https://github.com/NervJS/taro/commit/d1a6efc))
+* **rnapi:** 补充api ([046513c](https://github.com/NervJS/taro/commit/046513c))
+* **tans:** nothing ([f709b5a](https://github.com/NervJS/taro/commit/f709b5a))
+* **tarns-wx:** ref改造 添加方法入口 ([37dbb45](https://github.com/NervJS/taro/commit/37dbb45))
+* **trans:** add basic support for long list listView ([5c002cd](https://github.com/NervJS/taro/commit/5c002cd))
+* **trans:** auto add dispaly to flex container ([814b161](https://github.com/NervJS/taro/commit/814b161))
+* **trans:** eflow的适配 ([105b718](https://github.com/NervJS/taro/commit/105b718))
+* **trans:** eject 支持classProperty ([8e6207f](https://github.com/NervJS/taro/commit/8e6207f))
+* **trans:** support .wx.js  / support alias for image source and entry ([d359b69](https://github.com/NervJS/taro/commit/d359b69))
+* **trans:** 完善eject的用例 ([8f1c668](https://github.com/NervJS/taro/commit/8f1c668))
+* **trans:** 支持jsx方法 ([f8891d4](https://github.com/NervJS/taro/commit/f8891d4))
+* **trans-wx:** fix  import * as React ...形式的导入 ([65247db](https://github.com/NervJS/taro/commit/65247db))
+* **trans-wx:** GAI:10 width;100% 只在flex布局是row的时候添加保持和RN一致 ([d234a6f](https://github.com/NervJS/taro/commit/d234a6f))
+* **trans-wx:** GAI:10flex容器添加flexContainer属性 ([a34a18f](https://github.com/NervJS/taro/commit/a34a18f))
+* **trans-wx:** GAI:11 添加ref.method的方法的通用补丁入口 ([c29f040](https://github.com/NervJS/taro/commit/c29f040))
+* **trans-wx:** GAI:7 图片转换把source转化为src ([b947c21](https://github.com/NervJS/taro/commit/b947c21))
+* **trans-wx:** GAI:7 添加本地图片的require()格式转化， 本地图base64编码 ([57256cc](https://github.com/NervJS/taro/commit/57256cc))
+* **trans-wx:** GAI:8提供resizeMode的转换 ([a50314c](https://github.com/NervJS/taro/commit/a50314c))
+* **trans-wx:** require('本地pic')优化，添加运行时判断 ([50e2abe](https://github.com/NervJS/taro/commit/50e2abe))
+* **trans-wx:** taro提供全局map对象，解决多次出现resizeMOde都是变量时候的申明问题 ([307fdf2](https://github.com/NervJS/taro/commit/307fdf2))
+* **trans-wx:** 事件属性换名统一在render中处理 ([91f82e0](https://github.com/NervJS/taro/commit/91f82e0))
+* **trans-wx:** 提供onLayout事件的支持 ([76e8bb8](https://github.com/NervJS/taro/commit/76e8bb8))
+* **trans-wx:** 重构代码 ([6607ba7](https://github.com/NervJS/taro/commit/6607ba7))
+* **transfomer:** 删除StyleSheet.create只留对象 ([a838e67](https://github.com/NervJS/taro/commit/a838e67))
+* **transform-wx:** 编译rn中的touchable到View组件并且替换onpress到bindtap ([7dbbd89](https://github.com/NervJS/taro/commit/7dbbd89))
+* **tranx:** 查询依赖组件时提供路径中断配置 ([5b17358](https://github.com/NervJS/taro/commit/5b17358))
+* **tranx-wx:** GAI:9 scrollView的RN到微信转化 ([1b64342](https://github.com/NervJS/taro/commit/1b64342))
 
 
 

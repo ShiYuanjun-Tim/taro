@@ -15,8 +15,10 @@
     "sourceMap": true,
     "baseUrl": ".",
     "rootDir": "src",
-    "allowJs": true
+    "allowJs": true,
+    "lib": ["es6","es5","esnext","dom"]
   },
+
   "include": ["src"],
   "exclude": [
     "__tests__",

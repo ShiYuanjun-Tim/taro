@@ -12,13 +12,14 @@
     "package.json"
   ],
   "scripts": {
-    "dev": "../../node_modules/.bin/tsc -w --pretty",
+    "dev": "tsc -w --pretty",
     "lint": "tslint",
-    "build": "../../node_modules/.bin/ tsc"
+    "build": "tsc"
   },
   "author": "shiyuanjun-Tim",
   "license": "MIT",
   "dependencies": {
+    "@types/node": "^11.13.4",
     "debounce": "^1.2.0"
   }
 }

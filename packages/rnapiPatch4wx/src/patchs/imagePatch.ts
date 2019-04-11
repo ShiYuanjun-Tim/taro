@@ -143,7 +143,7 @@ export function turnRequireLocalImgToBase64Str (requireCallExprPath: NodePath<t.
     const rawPath = srcVal.value
     const ext = pathM.extname(rawPath).substr(1)
     if (IMG_SUPPORT.test(ext)) {
-      let imgPath = null
+      let imgPath = ""
       if(pathM.isAbsolute(rawPath)) {
         imgPath = rawPath
       } else if(rawPath.startsWith('.')){

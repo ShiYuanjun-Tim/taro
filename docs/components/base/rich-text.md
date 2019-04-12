@@ -13,9 +13,9 @@ sidebar_label: RichText
 
 ###### 示例：
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 // 引入 RichText 组件
-import { RichText } from '@tarojs/components'
+import { RichText } from '@tarojsrn/components'
 
 class App extends Components {
   state = {

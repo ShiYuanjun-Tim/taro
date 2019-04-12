@@ -1,7 +1,7 @@
 const fs = require('fs-extra')
 const path = require('path')
 const chokidar = require('chokidar')
-const wxTransformer = require('@tarojs/transformer-wx')
+const wxTransformer = require('@tarojsrn/transformer-wx')
 const klaw = require('klaw')
 const traverse = require('babel-traverse').default
 const t = require('babel-types')
@@ -35,14 +35,14 @@ let pxTransformConfig = { designWidth: projectConfig.designWidth || 750 }
 const pathAlias = projectConfig.alias || {}
 
 const PACKAGES = {
-  '@tarojs/taro': '@tarojs/taro',
-  '@tarojs/taro-h5': '@tarojs/taro-h5',
-  '@tarojs/redux': '@tarojs/redux',
-  '@tarojs/redux-h5': '@tarojs/redux-h5',
-  '@tarojs/mobx': '@tarojs/mobx',
-  '@tarojs/mobx-h5': '@tarojs/mobx-h5',
-  '@tarojs/router': `@tarojs/router`,
-  '@tarojs/components': '@tarojs/components',
+  '@tarojsrn/taro': '@tarojsrn/taro',
+  '@tarojsrn/taro-h5': '@tarojsrn/taro-h5',
+  '@tarojsrn/redux': '@tarojsrn/redux',
+  '@tarojsrn/redux-h5': '@tarojsrn/redux-h5',
+  '@tarojsrn/mobx': '@tarojsrn/mobx',
+  '@tarojsrn/mobx-h5': '@tarojsrn/mobx-h5',
+  '@tarojsrn/router': `@tarojsrn/router`,
+  '@tarojsrn/components': '@tarojsrn/components',
   'nervjs': 'nervjs',
   'nerv-redux': 'nerv-redux'
 }
@@ -126,7 +126,7 @@ function processEntry (code, filePath) {
 
   ast = babel.transformFromAst(ast, '', {
     plugins: [
-      [require('babel-plugin-danger-remove-unused-import'), { ignore: ['@tarojs/taro', 'react', 'nervjs'] }]
+      [require('babel-plugin-danger-remove-unused-import'), { ignore: ['@tarojsrn/taro', 'react', 'nervjs'] }]
     ]
   }).ast
 
@@ -402,7 +402,7 @@ function processEntry (code, filePath) {
           }
           return
         }
-        if (value === PACKAGES['@tarojs/taro']) {
+        if (value === PACKAGES['@tarojsrn/taro']) {
           let specifier = specifiers.find(item => item.type === 'ImportDefaultSpecifier')
           if (specifier) {
             hasAddNervJsImportDefaultName = true
@@ -426,12 +426,12 @@ function processEntry (code, filePath) {
           source.value = PACKAGES['nervjs']
 
           if (taroApisSpecifiers.length) {
-            astPath.insertBefore(t.importDeclaration(taroApisSpecifiers, t.stringLiteral(PACKAGES['@tarojs/taro-h5'])))
+            astPath.insertBefore(t.importDeclaration(taroApisSpecifiers, t.stringLiteral(PACKAGES['@tarojsrn/taro-h5'])))
           }
           if (!specifiers.length) {
             astPath.remove()
           }
-        } else if (value === PACKAGES['@tarojs/redux']) {
+        } else if (value === PACKAGES['@tarojsrn/redux']) {
           const specifier = specifiers.find(item => {
             return t.isImportSpecifier(item) && item.imported.name === providerComponentName
           })
@@ -441,8 +441,8 @@ function processEntry (code, filePath) {
             providorImportName = providerComponentName
             specifiers.push(t.importSpecifier(t.identifier(providerComponentName), t.identifier(providerComponentName)))
           }
-          source.value = PACKAGES['@tarojs/redux-h5']
-        } else if (value === PACKAGES['@tarojs/mobx']) {
+          source.value = PACKAGES['@tarojsrn/redux-h5']
+        } else if (value === PACKAGES['@tarojsrn/mobx']) {
           const specifier = specifiers.find(item => {
             return t.isImportSpecifier(item) && item.imported.name === providerComponentName
           })
@@ -452,7 +452,7 @@ function processEntry (code, filePath) {
             providorImportName = providerComponentName
             specifiers.push(t.importSpecifier(t.identifier(providerComponentName), t.identifier(providerComponentName)))
           }
-          source.value = PACKAGES['@tarojs/mobx-h5']
+          source.value = PACKAGES['@tarojsrn/mobx-h5']
         }
       }
     },
@@ -519,9 +519,9 @@ function processEntry (code, filePath) {
     Program: {
       exit (astPath) {
         const importNervjsNode = t.importDefaultSpecifier(t.identifier(nervJsImportDefaultName))
-        const importRouterNode = toAst(`import { Router } from '${PACKAGES['@tarojs/router']}'`)
-        const importTaroH5Node = toAst(`import ${taroImportDefaultName} from '${PACKAGES['@tarojs/taro-h5']}'`)
-        const importComponentNode = toAst(`import { View, ${tabBarComponentName}, ${tabBarContainerComponentName}, ${tabBarPanelComponentName}} from '${PACKAGES['@tarojs/components']}'`)
+        const importRouterNode = toAst(`import { Router } from '${PACKAGES['@tarojsrn/router']}'`)
+        const importTaroH5Node = toAst(`import ${taroImportDefaultName} from '${PACKAGES['@tarojsrn/taro-h5']}'`)
+        const importComponentNode = toAst(`import { View, ${tabBarComponentName}, ${tabBarContainerComponentName}, ${tabBarPanelComponentName}} from '${PACKAGES['@tarojsrn/components']}'`)
         const lastImportIndex = _.findLastIndex(astPath.node.body, t.isImportDeclaration)
         const lastImportNode = astPath.get(`body.${lastImportIndex > -1 ? lastImportIndex : 0}`)
         const extraNodes = [
@@ -570,7 +570,7 @@ function processOthers (code, filePath, fileType) {
 
   ast = babel.transformFromAst(ast, '', {
     plugins: [
-      [require('babel-plugin-danger-remove-unused-import'), { ignore: ['@tarojs/taro', 'react', 'nervjs'] }]
+      [require('babel-plugin-danger-remove-unused-import'), { ignore: ['@tarojsrn/taro', 'react', 'nervjs'] }]
     ]
   }).ast
 
@@ -658,7 +658,7 @@ function processOthers (code, filePath, fileType) {
             const extname = path.extname(value)
             node.source = t.stringLiteral(path.join(dirname, path.basename(value, extname)).replace(/\\/g, '/'))
           }
-        } else if (value === PACKAGES['@tarojs/taro']) {
+        } else if (value === PACKAGES['@tarojsrn/taro']) {
           let specifier = specifiers.find(item => item.type === 'ImportDefaultSpecifier')
           if (specifier) {
             hasAddNervJsImportDefaultName = true
@@ -682,15 +682,15 @@ function processOthers (code, filePath, fileType) {
           source.value = PACKAGES['nervjs']
 
           if (taroApisSpecifiers.length) {
-            astPath.insertBefore(t.importDeclaration(taroApisSpecifiers, t.stringLiteral(PACKAGES['@tarojs/taro-h5'])))
+            astPath.insertBefore(t.importDeclaration(taroApisSpecifiers, t.stringLiteral(PACKAGES['@tarojsrn/taro-h5'])))
           }
           if (!specifiers.length) {
             astPath.remove()
           }
-        } else if (value === PACKAGES['@tarojs/redux']) {
-          source.value = PACKAGES['@tarojs/redux-h5']
-        } else if (value === PACKAGES['@tarojs/mobx']) {
-          source.value = PACKAGES['@tarojs/mobx-h5']
+        } else if (value === PACKAGES['@tarojsrn/redux']) {
+          source.value = PACKAGES['@tarojsrn/redux-h5']
+        } else if (value === PACKAGES['@tarojsrn/mobx']) {
+          source.value = PACKAGES['@tarojsrn/mobx-h5']
         }
       }
     },
@@ -713,7 +713,7 @@ function processOthers (code, filePath, fileType) {
           )
         }
         if (taroImportDefaultName) {
-          const importTaro = toAst(`import ${taroImportDefaultName} from '${PACKAGES['@tarojs/taro-h5']}'`)
+          const importTaro = toAst(`import ${taroImportDefaultName} from '${PACKAGES['@tarojsrn/taro-h5']}'`)
           node.body.unshift(importTaro)
         }
       }
@@ -897,7 +897,7 @@ async function buildDist (buildConfig) {
   if (watch) {
     h5Config.isWatch = true
   }
-  const webpackRunner = await npmProcess.getNpmPkg('@tarojs/webpack-runner')
+  const webpackRunner = await npmProcess.getNpmPkg('@tarojsrn/webpack-runner')
   webpackRunner(h5Config)
 }
 

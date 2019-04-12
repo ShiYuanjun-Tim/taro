@@ -9,7 +9,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @tarojs/cli
+**Note:** Version bump only for package @tarojsrn/cli
 
 <a name="0.0.68-beta.0"></a>
 ## [0.0.68-beta.0](https://github.com/NervJS/taro/compare/v0.0.67...v0.0.68-beta.0) (2018-07-05)
@@ -28,7 +28,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @tarojs/cli
+**Note:** Version bump only for package @tarojsrn/cli
 
 <a name="0.0.67-beta.1"></a>
 ## [0.0.67-beta.1](https://github.com/NervJS/taro/compare/v0.0.67-beta.0...v0.0.67-beta.1) (2018-07-04)
@@ -36,7 +36,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @tarojs/cli
+**Note:** Version bump only for package @tarojsrn/cli
 
 <a name="0.0.67-beta.0"></a>
 ## [0.0.67-beta.0](https://github.com/NervJS/taro/compare/v0.0.66...v0.0.67-beta.0) (2018-07-04)
@@ -44,4 +44,4 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @tarojs/cli
+**Note:** Version bump only for package @tarojsrn/cli

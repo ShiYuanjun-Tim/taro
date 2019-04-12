@@ -14,9 +14,9 @@ sidebar_label: OpenData
 小程序全部支持，属性参考[open-data](https://developers.weixin.qq.com/miniprogram/dev/component/open-data.html)。属性值请改写为驼峰式命名。
 
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 // 引入 OpenData 组件
-import { OpenData } from '@tarojs/components'
+import { OpenData } from '@tarojsrn/components'
 
 class App extends Components {
   render () {

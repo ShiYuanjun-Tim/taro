@@ -28,8 +28,8 @@ sidebar_label: Radio
 
 ###### 示例：
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
-import { View, Text, Radio } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Text, Radio } from '@tarojsrn/components'
 import './radio.scss'
 
 export default class PageRadio extends Component {

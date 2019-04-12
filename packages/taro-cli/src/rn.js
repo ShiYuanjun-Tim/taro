@@ -97,7 +97,7 @@ function initProjectFile () {
   const dependencies = require(path.join(process.cwd(), 'package.json')).dependencies
   pkgTempObj.dependencies = Object.assign({}, pkgTempObj.dependencies, dependencies)
   // Copy bin/crna-entry.js ?
-  const crnaEntryPath = path.join(path.dirname(npmProcess.resolveNpmSync('@tarojs/rn-runner')), 'src/bin/crna-entry.js')
+  const crnaEntryPath = path.join(path.dirname(npmProcess.resolveNpmSync('@tarojsrn/rn-runner')), 'src/bin/crna-entry.js')
 
   fs.writeFileSync(path.join(tempDir, 'app.json'), JSON.stringify(appJsonObject, null, 2))
   Util.printLog(Util.pocessTypeEnum.GENERATE, 'app.json', path.join(tempPath, 'app.json'))
@@ -181,7 +181,7 @@ async function buildDist ({watch}) {
     rnConfig.isWatch = true
   }
   rnConfig.projectDir = tempPath
-  const rnRunner = await npmProcess.getNpmPkg('@tarojs/rn-runner')
+  const rnRunner = await npmProcess.getNpmPkg('@tarojsrn/rn-runner')
   rnRunner(rnConfig)
 }
 

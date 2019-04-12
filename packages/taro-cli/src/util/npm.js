@@ -5,7 +5,7 @@ const chalk = require('chalk')
 const Util = require('./')
 
 const basedir = process.cwd()
-const taroPluginPrefix = '@tarojs/plugin-'
+const taroPluginPrefix = '@tarojsrn/plugin-'
 const PEERS = /UNMET PEER DEPENDENCY ([a-z\-0-9.]+)@(.+)/gm
 const npmCached = {}
 const erroneous = []

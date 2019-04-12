@@ -15,8 +15,8 @@ sidebar_label: Text
 
 ###### 示例：
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
-import { View, Text } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Text } from '@tarojsrn/components'
 
 export default class PageView extends Component {
   constructor () {

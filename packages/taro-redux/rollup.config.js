@@ -23,7 +23,7 @@ const baseConfig = {
   ],
   plugins: [
     alias({
-      '@tarojs/utils': join(cwd, '../taro-utils/dist/index')
+      '@tarojsrn/utils': join(cwd, '../taro-utils/dist/index')
     }),
     resolve({
       preferBuiltins: false

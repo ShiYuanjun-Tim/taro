@@ -27,7 +27,7 @@ title: 项目说明
 一个普通的入口文件示例如下
 
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 import Index from './pages/index'
 
 import './app.scss'
@@ -63,7 +63,7 @@ class App extends Component {
 
 ```
 
-可以看出入口文件也是 `React` 风格的写法，首先需要引用依赖 `@tarojs/taro`，这是 **Taro** 方案的基础框架，在这里我们继承了 `Component` 组件基类。
+可以看出入口文件也是 `React` 风格的写法，首先需要引用依赖 `@tarojsrn/taro`，这是 **Taro** 方案的基础框架，在这里我们继承了 `Component` 组件基类。
 
 通常入口文件会包含一个 `config` 配置项，这里的配置主要参考微信小程序的[全局配置](https://developers.weixin.qq.com/miniprogram/dev/framework/config.html)而来，在编译成小程序时，这一部分配置将会被抽离成 `app.json`，而编译成其他端，亦会有其他作用。
 
@@ -113,8 +113,8 @@ class App extends Component {
 
 ```jsx
 
-import Taro, { Component } from '@tarojs/taro'
-import { View, Text } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Text } from '@tarojsrn/components'
 import './index.scss'
 
 export default class Index extends Component {
@@ -145,7 +145,7 @@ export default class Index extends Component {
 
 Taro 的页面同样是继承自 `Component` 组件基类，每一个页面都拥有自己配置 `config`，这个配置参考自微信小程序的[页面配置](https://developers.weixin.qq.com/miniprogram/dev/framework/config.html)，在编译成小程序时，将会生成跟页面 JS 文件同名的 `json` 配置文件；在编译成 H5 时，`config` 配置中 `navigationBarTitleText` 将会被用来设置当前页面的标题。
 
-页面的样式文件建议放在与页面 JS 的同级目录下，然后通过 ES6 规范 `import` 进行引入，支持使用 CSS 预编译处理器，目前提供了 `sass` 预编译插件 `@tarojs/plugin-sass`，需要自行在本地进行安装。
+页面的样式文件建议放在与页面 JS 的同级目录下，然后通过 ES6 规范 `import` 进行引入，支持使用 CSS 预编译处理器，目前提供了 `sass` 预编译插件 `@tarojsrn/plugin-sass`，需要自行在本地进行安装。
 
 页面 JS 要求必须有一个 `render` 函数，函数返回 JSX 代码，具体 JSX 代码的写法请参考 [JSX 章节](./jsx.md)。
 
@@ -186,8 +186,8 @@ Taro 支持组件化开发，组件代码可以放在任意位置，不过建议
 ### 代码示例
 
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
-import { View, Image, Button } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Image, Button } from '@tarojsrn/components'
 import './tab.scss'
 
 class Tab extends Component {

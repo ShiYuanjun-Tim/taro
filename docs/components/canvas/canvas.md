@@ -14,9 +14,9 @@ sidebar_label: Canvas
 小程序全部支持，属性参考[canvas](https://developers.weixin.qq.com/miniprogram/dev/component/canvas.html#canvas)。属性值请改写为驼峰式命名。
 
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 // 引入 Canvas 组件
-import { Canvas } from '@tarojs/components'
+import { Canvas } from '@tarojsrn/components'
 
 class App extends Components {
   render () {

@@ -4,13 +4,13 @@ title: 安装及使用
 
 ## 安装
 
-安装 Taro 开发工具 `@tarojs/cli`
+安装 Taro 开发工具 `@tarojsrn/cli`
 
 使用 npm 或者 yarn 全局安装，或者直接使用[npx](https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b)
 
 ```bash
-$ npm install -g @tarojs/cli
-$ yarn global add @tarojs/cli
+$ npm install -g @tarojsrn/cli
+$ yarn global add @tarojsrn/cli
 ```
 
 ## 使用
@@ -24,7 +24,7 @@ $ taro init myApp
 npm 5.2+ 也可在不全局安装的情况下使用 npx 创建模板项目
 
 ```bash
-$ npx @tarojs/cli init myApp
+$ npx @tarojsrn/cli init myApp
 ```
 
 进入项目目录开始开发，目前已经支持 微信/百度/支付宝/字节跳动小程序、H5 以及 ReactNative 等端的代码转换，针对不同端的启动以及预览、打包方式并不一致
@@ -150,9 +150,9 @@ Taro 提供了更新命令来更新 CLI 工具自身和项目中 Taro 相关的�
 # taro
 $ taro update self
 # npm
-npm i -g @tarojs/cli@latest
+npm i -g @tarojsrn/cli@latest
 # yarn
-yarn global add @tarojs/cli@latest
+yarn global add @tarojsrn/cli@latest
 ```
 
 更新项目中 Taro 相关的依赖
@@ -178,19 +178,19 @@ $ taro info
       Yarn: 1.8.0 - /usr/local/bin/yarn
       npm: 5.6.0 - /usr/local/bin/npm
     npmPackages:
-      @tarojs/components: ^1.2.0-beta.3 => 1.2.0-beta.3
-      @tarojs/plugin-babel: ^1.2.0-beta.3 => 1.2.0-beta.3
-      @tarojs/plugin-csso: ^1.2.0-beta.3 => 1.2.0-beta.3
-      @tarojs/plugin-sass: ^1.2.0-beta.4 => 1.2.0-beta.4
-      @tarojs/plugin-uglifyjs: ^1.2.0-beta.3 => 1.2.0-beta.3
-      @tarojs/rn-runner: ^1.2.0-beta.4 => 1.2.0-beta.4
-      @tarojs/router: ^1.2.0-beta.3 => 1.2.0-beta.3
-      @tarojs/taro: ^1.2.0-beta.3 => 1.2.0-beta.3
-      @tarojs/taro-alipay: ^1.2.0-beta.3 => 1.2.0-beta.3
-      @tarojs/taro-h5: ^1.2.0-beta.3 => 1.2.0-beta.3
-      @tarojs/taro-swan: ^1.2.0-beta.3 => 1.2.0-beta.3
-      @tarojs/taro-weapp: ^1.2.0-beta.3 => 1.2.0-beta.3
-      @tarojs/webpack-runner: ^1.2.0-beta.3 => 1.2.0-beta.3
+      @tarojsrn/components: ^1.2.0-beta.3 => 1.2.0-beta.3
+      @tarojsrn/plugin-babel: ^1.2.0-beta.3 => 1.2.0-beta.3
+      @tarojsrn/plugin-csso: ^1.2.0-beta.3 => 1.2.0-beta.3
+      @tarojsrn/plugin-sass: ^1.2.0-beta.4 => 1.2.0-beta.4
+      @tarojsrn/plugin-uglifyjs: ^1.2.0-beta.3 => 1.2.0-beta.3
+      @tarojsrn/rn-runner: ^1.2.0-beta.4 => 1.2.0-beta.4
+      @tarojsrn/router: ^1.2.0-beta.3 => 1.2.0-beta.3
+      @tarojsrn/taro: ^1.2.0-beta.3 => 1.2.0-beta.3
+      @tarojsrn/taro-alipay: ^1.2.0-beta.3 => 1.2.0-beta.3
+      @tarojsrn/taro-h5: ^1.2.0-beta.3 => 1.2.0-beta.3
+      @tarojsrn/taro-swan: ^1.2.0-beta.3 => 1.2.0-beta.3
+      @tarojsrn/taro-weapp: ^1.2.0-beta.3 => 1.2.0-beta.3
+      @tarojsrn/webpack-runner: ^1.2.0-beta.3 => 1.2.0-beta.3
       eslint-config-taro: ^1.2.0-beta.3 => 1.2.0-beta.3
       eslint-plugin-taro: ^1.2.0-beta.3 => 1.2.0-beta.3
 ```

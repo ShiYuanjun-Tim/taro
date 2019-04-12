@@ -28,8 +28,8 @@ sidebar_label: CheckboxGroup
 ###### 示例：
 
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
-import { View, Text, Checkbox } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Text, Checkbox } from '@tarojsrn/components'
 
 export default class PageCheckbox extends Component {
   state = {

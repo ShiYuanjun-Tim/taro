@@ -7,7 +7,7 @@ import {
   render,
   internal_safe_get,
   internal_safe_set
-} from '@tarojs/taro'
+} from '@tarojsrn/taro'
 
 import initNativeApi from './native-api'
 import Component from './component'

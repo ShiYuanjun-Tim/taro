@@ -13,7 +13,7 @@ const entries = [{
 }]
 
 const baseConfig = {
-  external: ['nervjs', '@tarojs/taro-h5'],
+  external: ['nervjs', '@tarojsrn/taro-h5'],
   output: {
     format: 'cjs',
     sourcemap: false,

@@ -5,13 +5,13 @@ const t = require('babel-types')
 const _ = require('lodash')
 const generate = require('babel-generator').default
 const template = require('babel-template')
-const wxTransformer = require('@tarojs/transformer-wx')
+const wxTransformer = require('@tarojsrn/transformer-wx')
 const Util = require('../util')
 const babylonConfig = require('../config/babylon')
 const {source: toAst} = require('../util/ast_convert')
 
 const reactImportDefaultName = 'React'
-let taroImportDefaultName // import default from @tarojs/taro
+let taroImportDefaultName // import default from @tarojsrn/taro
 let componentClassName // get app.js class name
 const providerComponentName = 'Provider'
 const setStoreFuncName = 'setStore'
@@ -28,17 +28,17 @@ const taroApis = [
 ]
 
 const PACKAGES = {
-  '@tarojs/taro': '@tarojs/taro',
-  '@tarojs/taro-rn': '@tarojs/taro-rn',
-  '@tarojs/taro-router-rn': '@tarojs/taro-router-rn',
-  '@tarojs/redux': '@tarojs/redux',
-  '@tarojs/components': '@tarojs/components',
-  '@tarojs/components-rn': '@tarojs/components-rn',
+  '@tarojsrn/taro': '@tarojsrn/taro',
+  '@tarojsrn/taro-rn': '@tarojsrn/taro-rn',
+  '@tarojsrn/taro-router-rn': '@tarojsrn/taro-router-rn',
+  '@tarojsrn/redux': '@tarojsrn/redux',
+  '@tarojsrn/components': '@tarojsrn/components',
+  '@tarojsrn/components-rn': '@tarojsrn/components-rn',
   'react': 'react',
   'react-native': 'react-native',
-  'react-redux-rn': '@tarojs/taro-redux-rn',
-  '@tarojs/mobx': '@tarojs/mobx',
-  '@tarojs/mobx-rn': '@tarojs/mobx-rn'
+  'react-redux-rn': '@tarojsrn/taro-redux-rn',
+  '@tarojsrn/mobx': '@tarojsrn/mobx',
+  '@tarojsrn/mobx-rn': '@tarojsrn/mobx-rn'
 }
 
 function getInitPxTransformNode (projectConfig) {
@@ -234,7 +234,7 @@ function parseJSCode ({code, filePath, isEntryFile, projectConfig}) {
         }
         return
       }
-      if (value === PACKAGES['@tarojs/taro']) {
+      if (value === PACKAGES['@tarojsrn/taro']) {
         let specifier = specifiers.find(item => item.type === 'ImportDefaultSpecifier')
         if (specifier) {
           hasAddReactImportDefaultName = true
@@ -246,7 +246,7 @@ function parseJSCode ({code, filePath, isEntryFile, projectConfig}) {
             t.importDefaultSpecifier(t.identifier(reactImportDefaultName))
           )
         }
-        // 删除从@tarojs/taro引入的 React
+        // 删除从@tarojsrn/taro引入的 React
         specifiers.forEach((item, index) => {
           if (item.type === 'ImportDefaultSpecifier') {
             specifiers.splice(index, 1)
@@ -259,17 +259,17 @@ function parseJSCode ({code, filePath, isEntryFile, projectConfig}) {
             specifiers.splice(index, 1)
           }
         })
-        source.value = PACKAGES['@tarojs/taro-rn']
+        source.value = PACKAGES['@tarojsrn/taro-rn']
         // insert React
         astPath.insertBefore(template(`import React from 'react'`, babylonConfig)())
 
         if (taroApisSpecifiers.length) {
-          astPath.insertBefore(t.importDeclaration(taroApisSpecifiers, t.stringLiteral(PACKAGES['@tarojs/taro-rn'])))
+          astPath.insertBefore(t.importDeclaration(taroApisSpecifiers, t.stringLiteral(PACKAGES['@tarojsrn/taro-rn'])))
         }
         if (!specifiers.length) {
           astPath.remove()
         }
-      } else if (value === PACKAGES['@tarojs/redux']) {
+      } else if (value === PACKAGES['@tarojsrn/redux']) {
         const specifier = specifiers.find(item => {
           return t.isImportSpecifier(item) && item.imported.name === providerComponentName
         })
@@ -280,7 +280,7 @@ function parseJSCode ({code, filePath, isEntryFile, projectConfig}) {
           specifiers.push(t.importSpecifier(t.identifier(providerComponentName), t.identifier(providerComponentName)))
         }
         source.value = PACKAGES['react-redux-rn']
-      } else if (value === PACKAGES['@tarojs/mobx']) {
+      } else if (value === PACKAGES['@tarojsrn/mobx']) {
         const specifier = specifiers.find(item => {
           return t.isImportSpecifier(item) && item.imported.name === providerComponentName
         })
@@ -290,9 +290,9 @@ function parseJSCode ({code, filePath, isEntryFile, projectConfig}) {
           providorImportName = providerComponentName
           specifiers.push(t.importSpecifier(t.identifier(providerComponentName), t.identifier(providerComponentName)))
         }
-        source.value = PACKAGES['@tarojs/mobx-rn']
-      } else if (value === PACKAGES['@tarojs/components']) {
-        source.value = PACKAGES['@tarojs/components-rn']
+        source.value = PACKAGES['@tarojsrn/mobx-rn']
+      } else if (value === PACKAGES['@tarojsrn/components']) {
+        source.value = PACKAGES['@tarojsrn/components-rn']
       }
     },
     ClassProperty: getClassPropertyVisitor({filePath, pages, iconPaths, isEntryFile}),
@@ -380,10 +380,10 @@ function parseJSCode ({code, filePath, isEntryFile, projectConfig}) {
             }
           }
         })
-        // import Taro from @tarojs/taro-rn
+        // import Taro from @tarojsrn/taro-rn
         if (taroImportDefaultName) {
           const importTaro = template(
-            `import ${taroImportDefaultName} from '${PACKAGES['@tarojs/taro-rn']}'`,
+            `import ${taroImportDefaultName} from '${PACKAGES['@tarojsrn/taro-rn']}'`,
             babylonConfig
           )()
           node.body.unshift(importTaro)
@@ -432,9 +432,9 @@ function parseJSCode ({code, filePath, isEntryFile, projectConfig}) {
           )()
           node.body.push(initNativeApi)
 
-          // import @tarojs/taro-router-rn
+          // import @tarojsrn/taro-router-rn
           const importTaroRouter = template(
-            `import TaroRouter from '${PACKAGES['@tarojs/taro-router-rn']}'`,
+            `import TaroRouter from '${PACKAGES['@tarojsrn/taro-router-rn']}'`,
             babylonConfig
           )()
           node.body.unshift(importTaroRouter)
@@ -464,7 +464,7 @@ function parseJSCode ({code, filePath, isEntryFile, projectConfig}) {
         [require('babel-plugin-transform-jsx-to-stylesheet'), {filePath}],
         require('babel-plugin-transform-decorators-legacy').default,
         require('babel-plugin-transform-class-properties'),
-        [require('babel-plugin-danger-remove-unused-import'), {ignore: ['@tarojs/taro', 'react', 'react-native', 'nervjs']}],
+        [require('babel-plugin-danger-remove-unused-import'), {ignore: ['@tarojsrn/taro', 'react', 'react-native', 'nervjs']}],
         [require('babel-plugin-transform-define').default, constantsReplaceList]
       ]
     }).ast

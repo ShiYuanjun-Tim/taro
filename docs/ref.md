@@ -17,7 +17,7 @@ Taro 支持使用字符串和函数两种方式创建 Ref。
 
 ### 使用字符串创建 ref
 
-通过字符串创建 ref 只需要把一个字符串的名称赋给 `ref` prop。然后就通过 `this.refs` 访问到被定义的组件实例或 DOM 元素（小程序原生组件）。在微信小程序中，如果 `ref` 的是小程序原生组件，那么相当于使用 `createSeletorQuery` 取到小程序原生组件实例，如果是在 `H5(Web)` 环境中使用，那访问到的将是 `@tarojs/components` 对应组件的组件实例。
+通过字符串创建 ref 只需要把一个字符串的名称赋给 `ref` prop。然后就通过 `this.refs` 访问到被定义的组件实例或 DOM 元素（小程序原生组件）。在微信小程序中，如果 `ref` 的是小程序原生组件，那么相当于使用 `createSeletorQuery` 取到小程序原生组件实例，如果是在 `H5(Web)` 环境中使用，那访问到的将是 `@tarojsrn/components` 对应组件的组件实例。
 
 ```jsx
 class MyComponent extends Component {
@@ -28,7 +28,7 @@ class MyComponent extends Component {
     if (process.env.TARO_ENV === 'weapp') {
       // 这里 this.refs.input 访问的时候通过 `wx.createSeletorQuery` 取到的小程序原生组件
     } else if (process.env.TARO_ENV === 'h5') {
-      // 这里 this.refs.input 访问到的是 `@tarojs/components` 的 `Input` 组件实例
+      // 这里 this.refs.input 访问到的是 `@tarojsrn/components` 的 `Input` 组件实例
     }
   }
 

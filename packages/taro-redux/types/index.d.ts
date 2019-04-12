@@ -9,7 +9,7 @@
 import { ComponentClass } from 'react';
 import {
     Component,
-} from '@tarojs/taro';
+} from '@tarojsrn/taro';
 
 import {
     Action,

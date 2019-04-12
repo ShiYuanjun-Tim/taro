@@ -4,16 +4,16 @@ title: 使用 Mobx
 
 > 自 `1.2.0-beta.1` 开始支持
 
-[Mobx](https://mobx.js.org/) 为复杂项目中状态管理提供了一种简单高效的机制；Taro 提供了 `@tarojs/mobx` 来让开发人员在使用Mobx的过程中获得更加良好的开发体验。
+[Mobx](https://mobx.js.org/) 为复杂项目中状态管理提供了一种简单高效的机制；Taro 提供了 `@tarojsrn/mobx` 来让开发人员在使用Mobx的过程中获得更加良好的开发体验。
 
 > 下文中示例代码均在 [taro-mobx-sample](https://github.com/nanjingboy/taro-mobx-sample)
 
-首先请安装 `mobx` 、 `@tarojs/mobx` 、 `@tarojs/mobx-h5` 和 `@tarojs/mobx-rn`
+首先请安装 `mobx` 、 `@tarojsrn/mobx` 、 `@tarojsrn/mobx-h5` 和 `@tarojsrn/mobx-rn`
 
 ```bash
-$ yarn add mobx @tarojs/mobx @tarojs/mobx-h5 @tarojs/mobx-rn
+$ yarn add mobx @tarojsrn/mobx @tarojsrn/mobx-h5 @tarojsrn/mobx-rn
 # 或者使用 npm
-$ npm install --save mobx @tarojs/mobx @tarojs/mobx-h5 @tarojs/mobx-rn
+$ npm install --save mobx @tarojsrn/mobx @tarojsrn/mobx-h5 @tarojsrn/mobx-rn
 ```
 
 随后可以在项目 `src` 目录下新增一个 `store/counter.js` 文件
@@ -43,12 +43,12 @@ const counterStore = observable({
 export default counterStore
 ```
 
-接下来在项目入口文件 `app.js` 中使用 `@tarojs/mobx` 中提供的 `Provider` 组件将前面写好的 `store` 接入应用中
+接下来在项目入口文件 `app.js` 中使用 `@tarojsrn/mobx` 中提供的 `Provider` 组件将前面写好的 `store` 接入应用中
 
 ```jsx
 // src/app.js
-import Taro, { Component } from '@tarojs/taro'
-import { Provider } from '@tarojs/mobx'
+import Taro, { Component } from '@tarojsrn/taro'
+import { Provider } from '@tarojsrn/mobx'
 import Index from './pages/index'
 
 import counterStore from './store/counter'
@@ -94,13 +94,13 @@ Taro.render(<App />, document.getElementById('app'))
 
 ```
 
-然后，我们在页面中可通过 `@tarojs/mobx` 提供的 `inject` 以及 `observer` 方法将 `mobx` 与我们的页面进行关联
+然后，我们在页面中可通过 `@tarojsrn/mobx` 提供的 `inject` 以及 `observer` 方法将 `mobx` 与我们的页面进行关联
 
 ```jsx
 // src/pages/index/index.js
-import Taro, { Component } from '@tarojs/taro'
-import { View, Button, Text } from '@tarojs/components'
-import { observer, inject } from '@tarojs/mobx'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Button, Text } from '@tarojsrn/components'
+import { observer, inject } from '@tarojsrn/mobx'
 
 import './index.scss'
 
@@ -169,7 +169,7 @@ export default Index
   </Provider>
   ```
 
-  而在`@tarojs/mobx`中，我们需要使用以下方式设置：
+  而在`@tarojsrn/mobx`中，我们需要使用以下方式设置：
 
   ```jsx
   const store = {
@@ -215,9 +215,9 @@ export default Index
 * 自`1.2.0-beta.5`后，`propTypes`已从`taro-mobx`、`taro-mobx-h5`、`taro-mobx-rn`中剥离，如需使用，请单独进行安装：
 
   ```bash
-  $ yarn add @tarojs/mobx-prop-types
+  $ yarn add @tarojsrn/mobx-prop-types
   # 或者使用 npm
-  $ npm install --save @tarojs/mobx-prop-types
+  $ npm install --save @tarojsrn/mobx-prop-types
   ```
 
   `propTypes` 使用与[mobx-react](https://github.com/mobxjs/mobx-react#proptypes) 一致

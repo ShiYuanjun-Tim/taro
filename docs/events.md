@@ -5,7 +5,7 @@ title: 消息机制
 Taro 提供了 `Taro.Events` 来实现消息机制，使用时需要实例化它，如下
 
 ```jsx
-import Taro, { Events } from '@tarojs/taro'
+import Taro, { Events } from '@tarojsrn/taro'
 
 const events = new Events()
 
@@ -38,7 +38,7 @@ events.off()
 同时 Taro 还提供了一个全局消息中心 `Taro.eventCenter` 以供使用，它是 `Taro.Events` 的实例
 
 ```jsx
-import Taro from '@tarojs/taro'
+import Taro from '@tarojsrn/taro'
 
 Taro.eventCenter.on
 Taro.eventCenter.trigger

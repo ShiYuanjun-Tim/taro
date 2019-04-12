@@ -1,4 +1,4 @@
-import { onAndSyncApis, noPromiseApis, otherApis, initPxTransform } from '@tarojs/taro'
+import { onAndSyncApis, noPromiseApis, otherApis, initPxTransform } from '@tarojsrn/taro'
 import request from './api/request'
 import storage from './api/storage'
 import system from './api/system'

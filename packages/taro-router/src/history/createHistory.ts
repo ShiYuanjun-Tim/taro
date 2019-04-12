@@ -1,5 +1,5 @@
 import warning from 'warning';
-import Taro from '@tarojs/taro-h5';
+import Taro from '@tarojsrn/taro-h5';
 
 import { Action, History, HistoryState, Location } from '../utils/types';
 import createTransitionManager from './createTransitionManager';

@@ -20,9 +20,9 @@
   version "0.7.0"
   resolved "https://registry.npmjs.org/@sindresorhus/is/-/is-0.7.0.tgz#9a06f4f137ee84d7df0460c1fdb1135ffa6c50fd"
 
-"@tarojs/transformer-wx@1.0.4":
+"@tarojsrn/transformer-wx@1.0.4":
   version "1.0.4"
-  resolved "https://registry.npmjs.org/@tarojs/transformer-wx/-/transformer-wx-1.0.4.tgz#fcc45b533a8e0aca4b4aec6ce6f401b4bdb09827"
+  resolved "https://registry.npmjs.org/@tarojsrn/transformer-wx/-/transformer-wx-1.0.4.tgz#fcc45b533a8e0aca4b4aec6ce6f401b4bdb09827"
   dependencies:
     "@babel/code-frame" "^7.0.0-beta.44"
     babel-core "^6.26.3"

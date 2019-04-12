@@ -68,8 +68,8 @@ sidebar_label: Picker
 
 ###### 示例：
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
-import { View, Text, Picker } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Text, Picker } from '@tarojsrn/components'
 
 export default class PagePicker extends Component {
   state = {

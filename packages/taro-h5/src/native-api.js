@@ -1,4 +1,4 @@
-import { onAndSyncApis, noPromiseApis, otherApis, initPxTransform } from '@tarojs/taro'
+import { onAndSyncApis, noPromiseApis, otherApis, initPxTransform } from '@tarojsrn/taro'
 import { createSelectorQuery } from './api/createSelectorQuery'
 import request from './api/request'
 import * as storage from './api/storage'

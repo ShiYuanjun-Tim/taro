@@ -125,7 +125,7 @@ componentWillUnmount () {
 它将使用 `this.setState()` 来更新组件局部状态：
 
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 
 class Clock extends Component {
   constructor (props) {

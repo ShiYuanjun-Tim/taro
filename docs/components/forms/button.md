@@ -28,8 +28,8 @@ sidebar_label: Button
 
 ###### 示例：
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
-import { View, Text, Button } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Text, Button } from '@tarojsrn/components'
 
 export default class PageButton extends Component {
   state = {

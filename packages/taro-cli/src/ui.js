@@ -2,7 +2,7 @@ const fs = require('fs-extra')
 const path = require('path')
 const chokidar = require('chokidar')
 const chalk = require('chalk')
-const wxTransformer = require('@tarojs/transformer-wx')
+const wxTransformer = require('@tarojsrn/transformer-wx')
 const traverse = require('babel-traverse').default
 const t = require('babel-types')
 const generate = require('babel-generator').default
@@ -55,7 +55,7 @@ async function buildH5Script () {
     app: [path.join(tempPath, entryFile)]
   }, h5Config.entry)
   h5Config.isWatch = false
-  const webpackRunner = await npmProcess.getNpmPkg('@tarojs/webpack-runner')
+  const webpackRunner = await npmProcess.getNpmPkg('@tarojsrn/webpack-runner')
   webpackRunner(h5Config)
 }
 

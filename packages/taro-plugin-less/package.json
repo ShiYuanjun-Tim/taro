@@ -1,5 +1,5 @@
 {
-  "name": "@tarojs/plugin-less",
+  "name": "@tarojsrn/plugin-less",
   "version": "1.2.2-3",
   "description": "Taro 编译 less 文件",
   "main": "index.js",

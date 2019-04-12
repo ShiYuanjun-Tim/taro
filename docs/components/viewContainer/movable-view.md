@@ -15,9 +15,9 @@ sidebar_label: MovableView
 
 
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 // 引入 MovableArea, MovableView 组件
-import { MovableArea, MovableView } from '@tarojs/components'
+import { MovableArea, MovableView } from '@tarojsrn/components'
 
 class App extends Components {
   render () {

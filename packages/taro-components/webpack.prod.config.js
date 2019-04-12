@@ -16,7 +16,7 @@ module.exports = {
     classnames: 'commonjs2 classnames',
     weui: 'commonjs2 weui',
     'omit.js': 'commonjs2 omit.js',
-    '@tarojs/taro-h5': 'commonjs2 @tarojs/taro-h5'
+    '@tarojsrn/taro-h5': 'commonjs2 @tarojsrn/taro-h5'
   },
   module: {
     rules: [

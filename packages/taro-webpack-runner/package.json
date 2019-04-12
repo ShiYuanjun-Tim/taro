@@ -1,5 +1,5 @@
 {
-  "name": "@tarojs/webpack-runner",
+  "name": "@tarojsrn/webpack-runner",
   "version": "1.2.2-3",
   "description": "webpack runner for taro",
   "main": "index.js",

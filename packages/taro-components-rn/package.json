@@ -1,5 +1,5 @@
 {
-  "name": "@tarojs/components-rn",
+  "name": "@tarojsrn/components-rn",
   "version": "1.2.2-3",
   "description": "多端解决方案基础组件（RN）",
   "main": "./dist/index.js",

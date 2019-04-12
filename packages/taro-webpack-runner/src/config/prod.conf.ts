@@ -31,7 +31,7 @@ export default function (config: Partial<BuildConfig>): any {
     chunkDirectory = 'chunk',
     dllDirectory = 'lib',
     dllEntry = {
-      lib: ['nervjs', '@tarojs/taro-h5', '@tarojs/router', '@tarojs/components']
+      lib: ['nervjs', '@tarojsrn/taro-h5', '@tarojsrn/router', '@tarojsrn/components']
     },
 
     designWidth = 750,

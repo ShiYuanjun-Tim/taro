@@ -6,7 +6,7 @@ title: 微信小程序转 Taro
 
 Taro 可以将你的原生微信小程序应用转换为 Taro 代码，进而你可以通过 `taro build` 的命令将 Taro 代码转换为对应平台的代码，或者对转换后的 Taro 代码进行用 React 的方式进行二次开发。
 
-微信原生小程序转 Taro 的操作非常简单，首先必须安装使用 `npm i -g @tarojs/cli` 安装 Taro 命令行工具，其次在命令行中定位到小程序项目的根目录，根目录中运行：
+微信原生小程序转 Taro 的操作非常简单，首先必须安装使用 `npm i -g @tarojsrn/cli` 安装 Taro 命令行工具，其次在命令行中定位到小程序项目的根目录，根目录中运行：
 
 ```bash
 $ taro convert
@@ -18,9 +18,9 @@ $ taro convert
 假设已有一个转换后文件如下：
 
 ```javascript
-import { View } from '@tarojs/components'
-import Taro from '@tarojs/taro'
-import withWeapp from '@tarojs/with-weapp'
+import { View } from '@tarojsrn/components'
+import Taro from '@tarojsrn/taro'
+import withWeapp from '@tarojsrn/with-weapp'
 import './index.scss'
 
 var app = Taro.getApp()

@@ -1,4 +1,4 @@
-import Taro, { Component } from '@tarojs/taro-h5';
+import Taro, { Component } from '@tarojsrn/taro-h5';
 import Nerv from 'nervjs';
 import invariant from 'invariant';
 

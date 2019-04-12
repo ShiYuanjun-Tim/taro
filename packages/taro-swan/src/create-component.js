@@ -1,4 +1,4 @@
-import { getCurrentPageUrl } from '@tarojs/utils'
+import { getCurrentPageUrl } from '@tarojsrn/utils'
 
 import { isEmptyObject, noop } from './util'
 import { updateComponent } from './lifecycle'

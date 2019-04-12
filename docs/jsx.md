@@ -16,8 +16,8 @@ title: JSX 简介
 请观察以下代码：
 
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
-import { View } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View } from '@tarojsrn/components'
 
 class Home extends Component {
   render () {
@@ -30,7 +30,7 @@ class Home extends Component {
 
 ### 必须声明 `Taro` 和组件
 
-在这段代码中，大写开头的 JSX 标签 `View` 表示它是一个 Taro 组件，尽管在整段代码中，变量 `View`  看起来并没有被调用，但也必须从 `@tarojs/components`  中引入声明。变量 `Taro` 也是一个必须引入声明的变量，因为我们在编译期和运行时会依赖这个变量做一些特殊处理。**当你引入了组件时，一定要使用，不要出现没有使用的变量。**
+在这段代码中，大写开头的 JSX 标签 `View` 表示它是一个 Taro 组件，尽管在整段代码中，变量 `View`  看起来并没有被调用，但也必须从 `@tarojsrn/components`  中引入声明。变量 `Taro` 也是一个必须引入声明的变量，因为我们在编译期和运行时会依赖这个变量做一些特殊处理。**当你引入了组件时，一定要使用，不要出现没有使用的变量。**
 
 > 当你只用支持微信小程序时，可以不用引入组件例如  `View` 这样的声明。但我们仍然强烈推荐你在顶部引入你将要使用的组件，这样编辑器/IDE 能更好地提前发现可能出现的问题，也为将来可能需要的多端转换留有余地。
 
@@ -41,7 +41,7 @@ class Home extends Component {
 例如，下面的代码将无法按预期运行：
 
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 // 引入一个自定义组件组件
 import home_page from './page'
 
@@ -58,7 +58,7 @@ class App extends Component {
 为了解决这个问题，我们将 `home_page ` 重命名为 `HomePage`，然后使用 `<HomePage />` 引用：
 
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 // 引入一个自定义组件组件
 import HomePage from './page'
 
@@ -91,7 +91,7 @@ class App extends Component {
 if 语句和 for 循环在 JavaScript 中不是表达式，因此它们不能直接在 JSX 中使用，所以你可以将它们放在周围的代码中。
 
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 
 
 class App extends Components {

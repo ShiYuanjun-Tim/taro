@@ -1,9 +1,9 @@
 <%if (locals.typescript) {-%>
-import Taro, { Component, Config } from '@tarojs/taro'
+import Taro, { Component, Config } from '@tarojsrn/taro'
 <%} else { -%>
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 <%}-%>
-import { View, Text } from '@tarojs/components'
+import { View, Text } from '@tarojsrn/components'
 import './index.<%= css %>'
 
 export default class Index extends Component {

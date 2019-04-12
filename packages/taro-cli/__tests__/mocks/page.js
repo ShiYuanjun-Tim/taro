@@ -1,6 +1,6 @@
 const simplePageJS = `
-import Taro, { Component } from '@tarojs/taro'
-import { View, Text } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Text } from '@tarojsrn/components'
 import './index.css'
 
 export default class Index extends Component {
@@ -29,9 +29,9 @@ export default class Index extends Component {
 }
 `
 const reduxPageJS = `
-import Taro, { Component } from '@tarojs/taro'
-import { View, Button, Text } from '@tarojs/components'
-import { connect } from '@tarojs/redux'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Button, Text } from '@tarojsrn/components'
+import { connect } from '@tarojsrn/redux'
 
 import { add, minus, asyncAdd } from '../../actions/counter'
 

@@ -999,8 +999,8 @@ Taro 中组件以类的形式进行创建，并且单个文件中只能存在单
 > 使用两个空格进行缩进，不要混合使用空格与制表符作为缩进
 
 ```javascript
-import Taro, { Component } from '@tarojs/taro'
-import { View, Text } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Text } from '@tarojsrn/components'
 
 class MyComponent extends Component {
   render () {
@@ -1018,8 +1018,8 @@ class MyComponent extends Component {
 > JSX 属性均使用单引号
 
 ```javascript
-import Taro, { Component } from '@tarojs/taro'
-import { View, Input } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Input } from '@tarojsrn/components'
 
 class MyComponent extends Component {
   render () {
@@ -1172,8 +1172,8 @@ render () {
 #### 所有内置组件均需要引入后再使用
 
 ```javascript
-import Taro, { Component } from '@tarojs/taro'
-import { View } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View } from '@tarojsrn/components'
 
 class MyComponent extends Component {
   render () {
@@ -1189,8 +1189,8 @@ class MyComponent extends Component {
 #### 推荐使用对象解构的方式来使用 state、props
 
 ```javascript
-import Taro, { Component } from '@tarojs/taro'
-import { View, Input } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Input } from '@tarojsrn/components'
 
 class MyComponent extends Component {
   state = {
@@ -1252,8 +1252,8 @@ list.map(item => {
 > 因为在 `componentDidMount` 中调用  `this.setState` 会导致触发更新
 
 ```javascript
-import Taro, { Component } from '@tarojs/taro'
-import { View, Input } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Input } from '@tarojsrn/components'
 
 class MyComponent extends Component {
   state = {
@@ -1281,8 +1281,8 @@ class MyComponent extends Component {
 #### 不要在 componentWillUpdate/componentDidUpdate/render 中调用 this.setState
 
 ```javascript
-import Taro, { Component } from '@tarojs/taro'
-import { View, Input } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Input } from '@tarojsrn/components'
 
 class MyComponent extends Component {
   state = {
@@ -1319,8 +1319,8 @@ class MyComponent extends Component {
 #### 不要定义没有用到的 state
 
 ```javascript
-import Taro, { Component } from '@tarojs/taro'
-import { View, Input } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Input } from '@tarojsrn/components'
 
 class MyComponent extends Component {
   state = {
@@ -1342,8 +1342,8 @@ class MyComponent extends Component {
 #### 组件最好定义 defaultProps
 
 ```javascript
-import Taro, { Component } from '@tarojs/taro'
-import { View, Input } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Input } from '@tarojsrn/components'
 
 class MyComponent extends Component {
 
@@ -1371,8 +1371,8 @@ class MyComponent extends Component {
 #### render 方法必须有返回值
 
 ```javascript
-import Taro, { Component } from '@tarojs/taro'
-import { View, Input } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Input } from '@tarojsrn/components'
 
 class MyComponent extends Component {
   state = {
@@ -1413,8 +1413,8 @@ class MyComponent extends Component {
 > 在 Taro 中所有默认事件如 `onClick`、`onTouchStart` 等等，均以 `on` 开头
 
 ```javascript
-import Taro, { Component } from '@tarojs/taro'
-import { View, Input } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Input } from '@tarojsrn/components'
 
 class MyComponent extends Component {
   state = {
@@ -1440,8 +1440,8 @@ class MyComponent extends Component {
 #### 子组件传入函数时属性名需要以 on 开头
 
 ```javascript
-import Taro, { Component } from '@tarojs/taro'
-import { View, Input } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Input } from '@tarojsrn/components'
 
 import Tab from '../../components/Tab/Tab'
 

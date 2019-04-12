@@ -1,10 +1,10 @@
-import '@tarojs/async-await'
+import '@tarojsrn/async-await'
 <%if (locals.typescript) {-%>
-import Taro, { Component, Config } from '@tarojs/taro'
+import Taro, { Component, Config } from '@tarojsrn/taro'
 <%} else { -%>
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 <%}-%>
-import { Provider } from '@tarojs/redux'
+import { Provider } from '@tarojsrn/redux'
 
 import Index from './pages/index'
 

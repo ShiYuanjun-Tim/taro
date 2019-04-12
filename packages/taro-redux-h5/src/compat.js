@@ -1,6 +1,6 @@
 /* eslint-disable-next-line import/no-unresolved */
 export { createElement } from 'nervjs'
-export { Component } from '@tarojs/taro-h5'
+export { Component } from '@tarojsrn/taro-h5'
 
 const EMPTY_ARRAY = []
 const isArray = Array.isArray

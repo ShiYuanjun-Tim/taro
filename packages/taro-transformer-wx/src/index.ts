@@ -15,10 +15,10 @@ import { eslintValidation } from './eslint'
 import imageTransformer, {
   varNameOfModeMap ,
   varNameOfSourceGuard,
-  turnRequireLocalImgToBase64Str } from '@tarojs/rnap4wx/lib/patchs/imagePatch'
+  turnRequireLocalImgToBase64Str } from '@tarojsrn/rnap4wx/lib/patchs/imagePatch'
 import scrollViewTransformer from './patchs/scrollViewPatch'
 import { addStyle } from './patchs/utils'
-import { rn2wx } from '@tarojs/taro'
+import { rn2wx } from '@tarojsrn/taro'
 
 const template = require('babel-template')
 
@@ -191,7 +191,7 @@ export default function transform (options: Options): TransformResult {
     plugins: [
       require('babel-plugin-transform-flow-strip-types'),
       [require('babel-plugin-transform-define').default, options.env],
-      [require('@tarojs/rnap4wx/lib/babel-plugin/replacement-of-RN') , {
+      [require('@tarojsrn/rnap4wx/lib/babel-plugin/replacement-of-RN') , {
         filepath: options.sourcePath,
         alias
       }]
@@ -573,7 +573,7 @@ export default function transform (options: Options): TransformResult {
           // GAI:1
           const isReactComponentImported = source === 'react' && name === 'Component'
           if (isReactComponentImported) {
-            // 把reactCompoent组件替换成 @tarojs/taro-weapp 的
+            // 把reactCompoent组件替换成 @tarojsrn/taro-weapp 的
             path.parentPath.insertAfter(getWeappImportDeclaration())
             path.remove()
           }
@@ -593,7 +593,7 @@ export default function transform (options: Options): TransformResult {
         t.importSpecifier(t.identifier(INTERNAL_INLINE_STYLE), t.identifier(INTERNAL_INLINE_STYLE)),
         t.importSpecifier(t.identifier(GEL_ELEMENT_BY_ID), t.identifier(GEL_ELEMENT_BY_ID))
 
-      ], t.stringLiteral('@tarojs/taro'))
+      ], t.stringLiteral('@tarojsrn/taro'))
     )
   }
 
@@ -643,5 +643,5 @@ function getWeappImportDeclaration (): t.ImportDeclaration {
     t.importSpecifier(t.identifier('__BaseComponent'), t.identifier('Component')),
     t.importSpecifier(t.identifier(varNameOfModeMap), t.identifier(rn2wx.varNames.modeMapping)),
     t.importSpecifier(t.identifier(varNameOfSourceGuard), t.identifier(rn2wx.varNames.sourceGuardFun))
-  ], t.stringLiteral('@tarojs/taro-weapp'))
+  ], t.stringLiteral('@tarojsrn/taro-weapp'))
 }

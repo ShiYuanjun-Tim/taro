@@ -1,4 +1,4 @@
-import { Component } from '@tarojs/taro-h5'
+import { Component } from '@tarojsrn/taro-h5'
 import Nerv from 'nervjs'
 import classNames from 'classnames'
 

@@ -1,4 +1,4 @@
-import { shallowEqual } from '@tarojs/utils'
+import { shallowEqual } from '@tarojsrn/utils'
 
 import Component from './component'
 

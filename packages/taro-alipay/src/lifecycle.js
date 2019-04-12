@@ -1,7 +1,7 @@
 import {
   internal_safe_get as safeGet,
   internal_safe_set as safeSet
-} from '@tarojs/taro'
+} from '@tarojsrn/taro'
 import { componentTrigger } from './create-component'
 import { shakeFnFromObject, isEmptyObject, diffObjToPath } from './util'
 import PropTypes from 'prop-types'

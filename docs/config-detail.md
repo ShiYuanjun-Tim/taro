@@ -389,7 +389,7 @@ h5: {
   /* 其他配置 */
   ...,
   dllEntry: {
-    lib: ['nervjs', '@tarojs/taro-h5', '@tarojs/router', '@tarojs/components']
+    lib: ['nervjs', '@tarojsrn/taro-h5', '@tarojsrn/router', '@tarojsrn/components']
   }
 }
 ```

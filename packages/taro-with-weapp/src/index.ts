@@ -1,7 +1,7 @@
 import {
   Component,
   ComponentLifecycle
-} from '@tarojs/taro'
+} from '@tarojsrn/taro'
 import isEqual from 'lodash/isEqual'
 import safeSet from 'lodash/set'
 

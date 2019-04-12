@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@tarojs/taro@0.0.54":
+"@tarojsrn/taro@0.0.54":
   version "0.0.54"
-  resolved "https://registry.npmjs.org/@tarojs/taro/-/taro-0.0.54.tgz#5b862dfc9ee885f43e3e2282570667e8841cb68f"
+  resolved "https://registry.npmjs.org/@tarojsrn/taro/-/taro-0.0.54.tgz#5b862dfc9ee885f43e3e2282570667e8841cb68f"
 
 ansi-regex@^2.0.0:
   version "2.1.1"

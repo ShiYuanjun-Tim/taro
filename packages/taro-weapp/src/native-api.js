@@ -3,7 +3,7 @@ import {
   noPromiseApis,
   otherApis,
   initPxTransform
-} from '@tarojs/taro'
+} from '@tarojsrn/taro'
 import { cacheDataSet, cacheDataGet } from './data-cache'
 import { queryToJson, getUniqueKey } from './util'
 const RequestQueue = {

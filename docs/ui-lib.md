@@ -65,8 +65,8 @@ if (process.env.TARO_BUILD_TYPE === 'ui') {
       externals: {
         nervjs: 'commonjs2 nervjs',
         classnames: 'commonjs2 classnames',
-        '@tarojs/components': 'commonjs2 @tarojs/components',
-        '@tarojs/taro-h5': 'commonjs2 @tarojs/taro-h5',
+        '@tarojsrn/components': 'commonjs2 @tarojsrn/components',
+        '@tarojsrn/taro-h5': 'commonjs2 @tarojsrn/taro-h5',
         'weui': 'commonjs2 weui'
       }
     })

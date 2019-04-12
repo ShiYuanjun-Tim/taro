@@ -5,8 +5,8 @@ title: 微信小程序原生作用域获取
 在 Taro 的页面和组件类中，`this` 指向的是 Taro 页面或组件的实例，例如
 
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
-import { View } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View } from '@tarojsrn/components'
 
 export default class Menu extends Component {
   static defaultProps = {

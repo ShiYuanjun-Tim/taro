@@ -1,5 +1,5 @@
 import Nerv from 'nervjs'
-import { Component } from '@tarojs/taro-h5'
+import { Component } from '@tarojsrn/taro-h5'
 import Router from '../src/router/router'
 import createHistory from '../src/history/createHashHistory'
 import { createLocation } from '../src/history/LocationUtils';

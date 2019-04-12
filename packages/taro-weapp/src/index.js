@@ -10,7 +10,7 @@ import {
   internal_inline_style,
   internal_get_original,
   rn2wx
-} from '@tarojs/taro'
+} from '@tarojsrn/taro'
 
 import Component from './component'
 import PureComponent from './pure-component'

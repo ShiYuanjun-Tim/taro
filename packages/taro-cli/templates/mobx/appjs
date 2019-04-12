@@ -1,9 +1,9 @@
 <%if (locals.typescript) {-%>
-import Taro, { Component, Config } from '@tarojs/taro'
+import Taro, { Component, Config } from '@tarojsrn/taro'
 <%} else { -%>
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 <%}-%>
-import { Provider } from '@tarojs/mobx'
+import { Provider } from '@tarojsrn/mobx'
 import Index from './pages/index'
 
 import counterStore from './store/counter'

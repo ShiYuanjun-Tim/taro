@@ -1,4 +1,4 @@
-import { onAndSyncApis, noPromiseApis, otherApis } from '@tarojs/taro'
+import { onAndSyncApis, noPromiseApis, otherApis } from '@tarojsrn/taro'
 import request from './api/request'
 import storage from './api/storage'
 

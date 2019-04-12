@@ -1,5 +1,5 @@
 const projAppJS = `
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 import Index from './pages/index'
 
 import './app.scss'
@@ -63,7 +63,7 @@ class App extends Component {
 Taro.render(<App/>, document.getElementById('app'))
 `
 const simpleAppJS = `
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 import Index from './pages/index'
 
 import './app.scss'
@@ -101,9 +101,9 @@ Taro.render(<App />, document.getElementById('app'))
 
 `
 const reduxAppJS = `
-import Taro, { Component } from '@tarojs/taro'
-import '@tarojs/async-await'
-import { Provider } from '@tarojs/redux'
+import Taro, { Component } from '@tarojsrn/taro'
+import '@tarojsrn/async-await'
+import { Provider } from '@tarojsrn/redux'
 
 import Index from './pages/index'
 
@@ -148,4 +148,4 @@ Taro.render(<App />, document.getElementById('app'))
 
 `
 
-export { projAppJS, simpleAppJS ,reduxAppJS}
+export { projAppJS, simpleAppJS, reduxAppJS}

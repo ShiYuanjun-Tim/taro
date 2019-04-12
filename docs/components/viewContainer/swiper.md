@@ -25,9 +25,9 @@ sidebar_label: Swiper
 
 ###### 示例：
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 // 引入 Swiper, SwiperItem 组件
-import { Swiper, SwiperItem } from '@tarojs/components'
+import { Swiper, SwiperItem } from '@tarojsrn/components'
 
 class App extends Components {
   render () {

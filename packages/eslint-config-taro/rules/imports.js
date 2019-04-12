@@ -22,8 +22,8 @@ module.exports = {
       '.jsx'
     ],
     'import/core-modules': [
-      '@tarojs/taro',
-      '@tarojs/components'
+      '@tarojsrn/taro',
+      '@tarojsrn/components'
     ]
   },
 

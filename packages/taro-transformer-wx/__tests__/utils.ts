@@ -14,8 +14,8 @@ export function buildComponent (
 ) {
   return `
 ${head}
-import Taro, { Component } from '@tarojs/taro'
-import { View, Button } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Button } from '@tarojsrn/components'
 
 export default class Index extends Component {
   ${classMethod}

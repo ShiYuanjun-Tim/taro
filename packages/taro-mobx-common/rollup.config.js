@@ -4,7 +4,7 @@ export default {
   input: 'src/index.js',
   output: {
     sourcemap: false,
-    name: '@tarojs/mobx-common',
+    name: '@tarojsrn/mobx-common',
     exports: 'named',
     format: 'umd',
     file: 'dist/index.js'
@@ -17,8 +17,8 @@ export default {
         }]
       ],
       plugins: [
-        "@babel/plugin-proposal-class-properties"
+        '@babel/plugin-proposal-class-properties'
       ]
-    }),
+    })
   ].filter(Boolean)
 }

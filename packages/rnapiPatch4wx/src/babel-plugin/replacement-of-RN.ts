@@ -9,7 +9,7 @@ import patchLayoutEvtHandler , {appendRefAttr , changeRefAttr} from "../patchs/l
 declare const exports:any;
 declare const module:any;
 
-const RN_MODULE_NAME_REPLACEMENT = '@tarojs/rnap4wx'
+const RN_MODULE_NAME_REPLACEMENT = '@tarojsrn/rnap4wx'
 
 const conversionMap = {
   // rename and remove

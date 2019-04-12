@@ -6,8 +6,8 @@ const prettier = require('prettier')
 const traverse = require('babel-traverse').default
 const t = require('babel-types')
 const template = require('babel-template')
-const taroize = require('@tarojs/taroize')
-const wxTransformer = require('@tarojs/transformer-wx')
+const taroize = require('@tarojsrn/taroize')
+const wxTransformer = require('@tarojsrn/transformer-wx')
 const postcss = require('postcss')
 const unitTransform = require('postcss-taro-unit-transform')
 
@@ -237,12 +237,12 @@ class Convertor {
         },
         exit (astPath) {
           const lastImport = astPath.get('body').filter(p => p.isImportDeclaration()).pop()
-          const hasTaroImport = astPath.get('body').some(p => p.isImportDeclaration() && p.node.source.value === '@tarojs/taro')
+          const hasTaroImport = astPath.get('body').some(p => p.isImportDeclaration() && p.node.source.value === '@tarojsrn/taro')
           if (needInsertImportTaro && !hasTaroImport) {
             astPath.node.body.unshift(
               t.importDeclaration(
                 [t.importDefaultSpecifier(t.identifier('Taro'))],
-                t.stringLiteral('@tarojs/taro')
+                t.stringLiteral('@tarojsrn/taro')
               )
             )
           }
@@ -693,7 +693,7 @@ class Convertor {
     creator.template(templateName, 'indexhtml', path.join(this.convertDir, 'index.html'))
     creator.fs.commit(() => {
       const pkgObj = JSON.parse(fs.readFileSync(pkgPath).toString())
-      pkgObj.dependencies['@tarojs/with-weapp'] = `^${version}`
+      pkgObj.dependencies['@tarojsrn/with-weapp'] = `^${version}`
       fs.writeJSONSync(pkgPath, pkgObj, {
         spaces: 2,
         EOL: '\n'

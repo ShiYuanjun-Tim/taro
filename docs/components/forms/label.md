@@ -13,9 +13,9 @@ sidebar_label: Label
 
 
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 // 引入 Label 组件
-import { RadioGroup, Radio, Label } from '@tarojs/components'
+import { RadioGroup, Radio, Label } from '@tarojsrn/components'
 
 class App extends Components {
 

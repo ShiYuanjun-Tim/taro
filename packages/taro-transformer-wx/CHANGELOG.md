@@ -32,7 +32,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @tarojs/transformer-wx
+**Note:** Version bump only for package @tarojsrn/transformer-wx
 
 <a name="0.0.67-beta.0"></a>
 ## [0.0.67-beta.0](https://github.com/NervJS/taro/compare/v0.0.66...v0.0.67-beta.0) (2018-07-04)

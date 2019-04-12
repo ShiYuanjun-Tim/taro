@@ -17,7 +17,7 @@
     "release:lerna": "lerna publish --force-publish=* --exact --temp-tag --dist-tag rn --npm-tag=rn",
     "release:beta": "lerna publish --force-publish=* --exact --skip-temp-tag  --preid=beta --npm-tag=beta",
     "release": "npm-run-all build release:lerna && npm run changelog",
-    "test": "lerna run --scope eslint-plugin-taro  --scope @tarojs/transformer-wx test",
+    "test": "lerna run --scope eslint-plugin-taro  --scope @tarojsrn/transformer-wx test",
     "tarochange": "cd ./packages/taro && npm run build && cd ../taro-weapp && npm run build "
   },
   "repository": {

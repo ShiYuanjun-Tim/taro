@@ -1,10 +1,10 @@
 <%if (locals.typescript) {-%>
-import Taro, { Component, Config } from '@tarojs/taro'
+import Taro, { Component, Config } from '@tarojsrn/taro'
 <%} else { -%>
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojsrn/taro'
 <%}-%>
-import { View, Button, Text } from '@tarojs/components'
-import { observer, inject } from '@tarojs/mobx'
+import { View, Button, Text } from '@tarojsrn/components'
+import { observer, inject } from '@tarojsrn/mobx'
 
 import './index.<%= css %>'
 

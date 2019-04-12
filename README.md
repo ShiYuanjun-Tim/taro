@@ -1,9 +1,9 @@
 # Taro
 
-[![](https://img.shields.io/node/v/@tarojs/cli.svg?style=flat-square)](https://www.npmjs.com/package/@tarojs/cli)
-[![](https://img.shields.io/npm/v/@tarojs/taro.svg?style=flat-square)](https://www.npmjs.com/package/@tarojs/taro)
-[![](https://img.shields.io/npm/l/@tarojs/taro.svg?style=flat-square)](https://www.npmjs.com/package/@tarojs/taro)
-[![](https://img.shields.io/npm/dt/@tarojs/taro.svg?style=flat-square)](https://www.npmjs.com/package/@tarojs/taro)
+[![](https://img.shields.io/node/v/@tarojsrn/cli.svg?style=flat-square)](https://www.npmjs.com/package/@tarojsrn/cli)
+[![](https://img.shields.io/npm/v/@tarojsrn/taro.svg?style=flat-square)](https://www.npmjs.com/package/@tarojsrn/taro)
+[![](https://img.shields.io/npm/l/@tarojsrn/taro.svg?style=flat-square)](https://www.npmjs.com/package/@tarojsrn/taro)
+[![](https://img.shields.io/npm/dt/@tarojsrn/taro.svg?style=flat-square)](https://www.npmjs.com/package/@tarojsrn/taro)
 [![](https://img.shields.io/travis/NervJS/taro.svg?style=flat-square)](https://travis-ci.org/NervJS/taro)
 
 > 👽 Taro['tɑ:roʊ]，泰罗·奥特曼，宇宙警备队总教官，实力最强的奥特曼。
@@ -38,8 +38,8 @@ Taro 的语法规则基于 React 规范，它采用与 React 一致的组件化�
 代码示例
 
 ```javascript
-import Taro, { Component } from '@tarojs/taro'
-import { View, Button } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Button } from '@tarojsrn/components'
 
 export default class Index extends Component {
   constructor () {

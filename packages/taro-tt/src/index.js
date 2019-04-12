@@ -9,7 +9,7 @@ import {
   internal_safe_set,
   internal_inline_style,
   internal_get_original
-} from '@tarojs/taro'
+} from '@tarojsrn/taro'
 
 import Component from './component'
 import PureComponent from './pure-component'

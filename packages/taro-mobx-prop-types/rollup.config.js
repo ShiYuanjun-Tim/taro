@@ -4,7 +4,7 @@ export default {
   input: 'src/index.js',
   output: {
     sourcemap: false,
-    name: '@tarojs/mobx-prop-types',
+    name: '@tarojsrn/mobx-prop-types',
     exports: 'named',
     format: 'umd',
     file: 'dist/index.js'

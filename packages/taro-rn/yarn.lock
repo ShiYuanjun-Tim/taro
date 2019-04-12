@@ -434,9 +434,9 @@
     lodash "^4.17.5"
     to-fast-properties "^2.0.0"
 
-"@tarojs/taro@1.0.3":
+"@tarojsrn/taro@1.0.3":
   version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@tarojs/taro/-/taro-1.0.3.tgz#5bab6f5e5d6f59f9baa31403ceb05c6a16b54e48"
+  resolved "https://registry.yarnpkg.com/@tarojsrn/taro/-/taro-1.0.3.tgz#5bab6f5e5d6f59f9baa31403ceb05c6a16b54e48"
 
 abab@^1.0.4:
   version "1.0.4"

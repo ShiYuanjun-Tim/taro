@@ -172,12 +172,12 @@ export const createWxmlVistor = (
           const template = parseTemplate(path, dirPath)
           if (template) {
             const { ast: classDecl, name } = template
-            const taroComponentsImport = buildImportStatement('@tarojs/components', [
+            const taroComponentsImport = buildImportStatement('@tarojsrn/components', [
               ...usedComponents
             ])
-            const taroImport = buildImportStatement('@tarojs/taro', [], 'Taro')
+            const taroImport = buildImportStatement('@tarojsrn/taro', [], 'Taro')
             // const withWeappImport = buildImportStatement(
-            //   '@tarojs/with-weapp',
+            //   '@tarojsrn/with-weapp',
             //   [],
             //   'withWeapp'
             // )

@@ -1,6 +1,6 @@
-import { Component } from '@tarojs/taro-rn'
+import { Component } from '@tarojsrn/taro-rn'
 import { Children, createElement } from 'react'
-import { createProvider, inject as originInject } from '@tarojs/mobx-common'
+import { createProvider, inject as originInject } from '@tarojsrn/mobx-common'
 
 export function inject () {
   return originInject(...arguments, { Component, createElement })
@@ -8,4 +8,4 @@ export function inject () {
 
 export const Provider = createProvider(Component, Children)
 
-export { observer } from '@tarojs/mobx-common'
+export { observer } from '@tarojsrn/mobx-common'

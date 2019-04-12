@@ -3,7 +3,7 @@
  */
 
 import Nerv from 'nervjs';
-import { Component } from '@tarojs/taro-h5';
+import { Component } from '@tarojsrn/taro-h5';
 const ALL_INITIALIZERS: Function[] = [];
 const READY_INITIALIZERS: Function[] = [];
 

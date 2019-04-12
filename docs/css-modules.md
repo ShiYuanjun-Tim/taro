@@ -68,8 +68,8 @@ CSS Modules 使用方式如下
 组件 JS 中使用样式
 
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
-import { View, Text } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, Text } from '@tarojsrn/components'
 
 import styles from './Test.module.scss'
 

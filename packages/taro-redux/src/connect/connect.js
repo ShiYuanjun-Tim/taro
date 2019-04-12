@@ -1,4 +1,4 @@
-import { shallowEqual } from '@tarojs/utils'
+import { shallowEqual } from '@tarojsrn/utils'
 
 import { getStore } from '../utils/store'
 import { mergeObjects, isObject } from '../utils'

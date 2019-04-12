@@ -61,7 +61,7 @@ describe('基本功能', () => {
     })
 
     expect(
-      code.trim().startsWith(`import "@tarojs/async-await";`)
+      code.trim().startsWith(`import "@tarojsrn/async-await";`)
     ).toBeTruthy()
   })
 
@@ -76,7 +76,7 @@ describe('基本功能', () => {
           </Provider>
         )`,
         '',
-        `import { Provider, connect } from '@tarojs/redux';
+        `import { Provider, connect } from '@tarojsrn/redux';
         const test = {};`
       )
     })

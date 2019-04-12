@@ -3,7 +3,7 @@ import {
   noPromiseApis,
   otherApis,
   initPxTransform
-} from '@tarojs/taro'
+} from '@tarojsrn/taro'
 
 const apiDiff = {
   showActionSheet: {

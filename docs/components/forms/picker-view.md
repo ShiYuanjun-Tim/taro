@@ -24,8 +24,8 @@ sidebar_label: PickerView
 ###### 示例：
 
 ```jsx
-import Taro, { Component } from '@tarojs/taro'
-import { View, PickerView, PickerViewColumn } from '@tarojs/components'
+import Taro, { Component } from '@tarojsrn/taro'
+import { View, PickerView, PickerViewColumn } from '@tarojsrn/components'
 
 export default class Picks extends Component {
 

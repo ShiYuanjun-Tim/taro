@@ -1,5 +1,5 @@
 {
-  "name": "@tarojs/taro-redux-rn",
+  "name": "@tarojsrn/taro-redux-rn",
   "version": "1.2.2-3",
   "description": "taro-redux-rn",
   "main": "./src/index.js",

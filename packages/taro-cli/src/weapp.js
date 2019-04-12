@@ -3,7 +3,7 @@ const os = require('os')
 const path = require('path')
 const chalk = require('chalk')
 const chokidar = require('chokidar')
-const wxTransformer = require('@tarojs/transformer-wx')
+const wxTransformer = require('@tarojsrn/transformer-wx')
 const babel = require('babel-core')
 const traverse = require('babel-traverse').default
 const t = require('babel-types')
@@ -57,12 +57,12 @@ const useCompileConf = Object.assign({}, weappConf.compile)
 const compileInclude = useCompileConf.include || []
 
 const notExistNpmList = []
-const taroJsFramework = '@tarojs/taro'
-const taroJsComponents = '@tarojs/components'
-const taroJsRedux = '@tarojs/redux'
+const taroJsFramework = '@tarojsrn/taro'
+const taroJsComponents = '@tarojsrn/components'
+const taroJsRedux = '@tarojsrn/redux'
 
 const eflow = 'react-eflow'
-const replaceofeflow = '@tarojs/rnap4wx/lib/patchs/eflow/wrapComponent.wx.js'
+const replaceofeflow = '@tarojsrn/rnap4wx/lib/patchs/eflow/wrapComponent.wx.js'
 
 let appConfig = {}
 const dependencyTree = {}
@@ -288,13 +288,13 @@ function parseAst (type, ast, depComponents, sourceFilePath, filePath, npmSkip =
   let configObj = {}
   let componentClassName = null
   let taroJsReduxConnect = null
-  let taroMiniAppFramework = `@tarojs/taro-${buildAdapter}`
+  let taroMiniAppFramework = `@tarojsrn/taro-${buildAdapter}`
   let taroImportDefaultName
   let needExportDefault = false
   let exportTaroReduxConnected = null
   ast = babel.transformFromAst(ast, '', {
     plugins: [
-      [require('babel-plugin-danger-remove-unused-import'), { ignore: ['@tarojs/taro', 'react', 'nervjs'] }],
+      [require('babel-plugin-danger-remove-unused-import'), { ignore: ['@tarojsrn/taro', 'react', 'nervjs'] }],
       [require('babel-plugin-transform-define').default, constantsReplaceList]
     ]
   }).ast

@@ -45,9 +45,9 @@ function info () {
 function updateSelf () {
   let command
   if (shouldUseCnpm()) {
-    command = 'cnpm i -g @tarojs/cli@latest'
+    command = 'cnpm i -g @tarojsrn/cli@latest'
   } else {
-    command = 'npm i -g @tarojs/cli@latest'
+    command = 'npm i -g @tarojsrn/cli@latest'
   }
 
   let child = exec(command)
@@ -73,7 +73,7 @@ async function updateProject () {
 
   const version = await getLatestVersion(pkgName)
 
-  // 更新 @tarojs/* 版本
+  // 更新 @tarojsrn/* 版本
   Object.keys(packageMap.dependencies).forEach((key) => {
     if (UPDATE_PACKAGE_LIST.indexOf(key) !== -1) {
       packageMap.dependencies[key] = version

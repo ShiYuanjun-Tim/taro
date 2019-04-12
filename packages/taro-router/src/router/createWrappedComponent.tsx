@@ -1,6 +1,6 @@
 import { tryToCall } from '../utils/index'
 import * as Types from '../utils/types'
-import { Component } from '@tarojs/taro-h5';
+import { Component } from '@tarojsrn/taro-h5';
 
 const createWrappedComponent = (component: Types.PageComponent) => {
   class WrappedComponent extends component {

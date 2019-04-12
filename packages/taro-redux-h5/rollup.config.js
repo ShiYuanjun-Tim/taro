@@ -11,20 +11,20 @@ export default {
   input: 'src/index.js',
   output: {
     sourcemap: true,
-    name: '@tarojs/redux-h5',
+    name: '@tarojsrn/redux-h5',
     exports: 'default',
     format: 'umd',
     file: 'dist/index.js',
     globals: {
       'nervjs': 'Nerv',
       'redux': 'Redux',
-      '@tarojs/taro-h5': 'taroH5'
+      '@tarojsrn/taro-h5': 'taroH5'
     }
   },
   external: [
     'nervjs',
     'redux',
-    '@tarojs/taro-h5'
+    '@tarojsrn/taro-h5'
   ],
   plugins: [
     memory({

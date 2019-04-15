@@ -1,6 +1,6 @@
 {
   "name": "@tarojsrn/mobx-rn",
-  "version": "1.2.2-10",
+  "version": "1.2.2-11",
   "description": "mobx-rn for taro",
   "keywords": [
     "mobx",
@@ -18,7 +18,7 @@
     "index.js"
   ],
   "dependencies": {
-    "@tarojsrn/mobx-common": "1.2.2-10",
-    "@tarojsrn/taro-rn": "1.2.2-10"
+    "@tarojsrn/mobx-common": "1.2.2-11",
+    "@tarojsrn/taro-rn": "1.2.2-11"
   }
 }

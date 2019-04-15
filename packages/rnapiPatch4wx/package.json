@@ -1,14 +1,12 @@
 {
   "name": "@tarojsrn/rnap4wx",
-  "version": "1.2.2-6",
+  "version": "1.2.2-7",
   "description": "Taro framework",
   "main": "lib/index.js",
   "typings": "types/index.d.ts",
   "files": [
-    "dist",
-    "src",
+    "lib",
     "index.js",
-    "types",
     "package.json"
   ],
   "scripts": {

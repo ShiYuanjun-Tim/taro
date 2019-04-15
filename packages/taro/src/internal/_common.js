@@ -956,7 +956,7 @@ function baseAssignValue(object, key, value) {
 }
 
 /** Used to check objects for own properties. */
-const hasOwnProperty = Object.prototype.hasOwnProperty
+// dupliucate declare const hasOwnProperty = Object.prototype.hasOwnProperty
 
 /**
  * Assigns `value` to `key` of `object` if the existing value is not equivalent

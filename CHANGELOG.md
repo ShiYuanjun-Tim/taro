@@ -1,5 +1,9 @@
 <a name=""></a>
-# [](https://github.com/NervJS/taro/compare/v1.2.2-6...v) (2019-04-15)
+
+
+### Features
+
+* **all:** 改名防止污染taro 并且冲突 ([9104297](https://github.com/NervJS/taro/commit/9104297))
 
 
 

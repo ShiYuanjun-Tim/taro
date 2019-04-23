@@ -42,23 +42,47 @@ export class Ejector {
 
   _clear () {
 
-    this.methodMap = null as any
     // clear uIFragMethodQueue
-    this.uIFragMethodSet2Delete.forEach(del => del.remove())
+    this.uIFragMethodSet2Delete.forEach(del => {
+      this.methodMap.delete(del.node.key.name)
+      del.remove()
+    })
+    this.methodMap.forEach(function(value, key) {
+      const { path , statistic } = value
+      if (key !== 'render' && key !== 'constructor' && statistic.onlyReturnUI && path) {
+        path.remove()
+      }
+    })
+
+    this.methodMap = null as any
+
   }
 
   getIdentifiersShouldInState () {
     return [...this.identifierCollection].map(id => t.identifier(id))
   }
 
-  findMethodByName (methodName) {
+  findMethodByName(methodName) {
     if (this.methodMap.has(methodName)) {
       return this.methodMap.get(methodName)
     }
     const clazElemsPath = this.root.get('body')
-    const methodPath = clazElemsPath.find(prop => (prop.isClassMethod() || prop.isClassProperty()) && prop.get('key').isIdentifier({ name: methodName }))
-    this.methodMap.set(methodName,methodPath)
-    return methodPath
+    const methodsArr = clazElemsPath.map((clzProPath) => {
+      if (clzProPath.isClassMethod()) {
+        return [clzProPath.node.key.name, { path: clzProPath, statistic: methodStatistic(clzProPath) }]
+      } else if (clzProPath.isClassProperty() && (
+        clzProPath.get('value').isFunctionExpression()
+        || clzProPath.get('value').isArrowFunctionExpression()
+      )
+      ) {
+        return [clzProPath.node.key.name, { path: clzProPath, statistic: methodStatistic(clzProPath) }]
+      }
+      return null
+
+    }).filter(ele => ele != null)
+    this.methodMap = new Map(methodsArr)
+
+    return this.methodMap.get(methodName)
   }
 
   nestCallExplorer (toBeExplore: NodePath<t.Node>) {
@@ -72,10 +96,9 @@ export class Ejector {
           && callee.get('object').isThisExpression()
         ) {
           const methodName = (callee.get('property').node as t.Identifier).name
-          const methodPath = this.findMethodByName(methodName)
-          // const renderPath = findMethodByName('render')
+          const { path: methodPath , statistic } = this.findMethodByName(methodName)
 
-          if (methodPath && isUIFragMethod(methodPath)) {
+          if (methodPath && statistic.isUIFragMethod()) {
             this.uIFragMethodSet2Delete.add(methodPath)
             // 需要深度优先遍历到最内的方法处理完后在一次处理上层调用
             this.nestCallExplorer(methodPath)
@@ -152,13 +175,14 @@ export class Ejector {
       })
     // 所有的额外定义都需要添加到 调用法最进的方法定义出
     varDeclarations = varDeclarations.concat(statementsArr)
+    const scopePath = callExpPath.scope.path
     // 添加这些变量申明到该调用所属的scope中， 位置最靠近调用方， 防止在申明前就使用变量
-    const blockStatementWhereFunIsCalled = (callExpPath.scope.block as any).body
-    const insertPosition = blockStatementWhereFunIsCalled.body.indexOf(callExpPath.getStatementParent().node)
-    Array.prototype.splice.apply(blockStatementWhereFunIsCalled.body, [insertPosition, 0].concat(varDeclarations))
+    const blockStatementPathWhereFunIsCalled: any = scopePath.isBlockStatement() ? scopePath : scopePath.get('body')
+    const insertPosition = blockStatementPathWhereFunIsCalled.node.body.indexOf(callExpPath.getStatementParent().node)
+    Array.prototype.splice.apply(
+      blockStatementPathWhereFunIsCalled.node.body, [insertPosition, 0].concat(varDeclarations));
     // 重新注册新加的声明到binding中
-    const blockStatementPath = callExpPath.scope.path.get('body');
-    (blockStatementPath.get('body') as any).forEach(mayBeDecl => {
+    (blockStatementPathWhereFunIsCalled.get('body') as any).forEach(mayBeDecl => {
       if (mayBeDecl.isVariableDeclaration()) {
         callExpPath.scope.registerDeclaration(mayBeDecl)
       }
@@ -223,7 +247,11 @@ export class Ejector {
     const newParamName = `${oldparamName}${scope.generateUid()}`
     // idPath.scope.rename(oldparamName, newParamName)
     const funcParent = idPath.getFunctionParent()
-    funcParent.scope.rename(oldparamName, newParamName)
+    try {
+      funcParent.scope.rename(oldparamName, newParamName)
+    }catch(e){
+      debugger
+    }
     if (funcParent.isClassMethod() && funcParent.get('key').isIdentifier({ name: 'render' })) {
       this.identifierCollection.recordAdd(oldparamName, newParamName)
     }
@@ -239,7 +267,7 @@ export default function ejectUIFragMethod (classBodyPath: NodePath<t.ClassBody>)
   return new Ejector(classBodyPath).getIdentifiersShouldInState()
 }
 
-export function isUIFragMethod (methodPath) {
+export function methodStatistic (methodPath) {
   let onlyReturnUI = false
   let returnClauseCount = 0
   let jsxCount = 0
@@ -272,7 +300,12 @@ export function isUIFragMethod (methodPath) {
     }
   })
 
-  return onlyReturnUI && returnClauseCount === 1 && jsxCount !== 0
+  return {
+    isUIFragMethod() {
+      return this.onlyReturnUI && this.returnClauseCount === 1 && this.jsxCount !== 0
+    },
+    onlyReturnUI, returnClauseCount, jsxCount
+  }
 }
 
 function assertOneReturn (methodPath) {

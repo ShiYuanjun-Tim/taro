@@ -113,7 +113,8 @@ function recordlistSourceName(path: NodePath<t.JSXOpeningElement>, name: string)
       clzprop = t.classProperty(t.identifier(ListViewSourceNamestorage) , t.arrayExpression([newConfig]))
       clzbodyPath.node.body.push(clzprop)
     } else {
-      clzprop.get('value.elements').node.push(newConfig)
+      // clzprop.get('value.elements').node.push(newConfig)
+      clzprop.node.value.elements.push(newConfig)
     }
    
 }

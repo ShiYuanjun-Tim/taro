@@ -31,7 +31,13 @@ export default function patchLayoutEvtHandler(path: NodePath<t.ClassBody>) {
       if(this.${P1}) {
         let candidate = this.${P1}.pop()
         while(candidate) {
-          const {noderef , fn} = candidate;
+          let {noderef , fn} = candidate;
+          
+          if(!noderef.boundingClientRect){ //自定义组件时
+            const a=wx.createSelectorQuery().in(noderef)
+            noderef = a.select("#"+noderef.$scope.id)       
+          }  
+
           noderef.boundingClientRect((res)=>{
             const {left ,right ,top ,bottom ,width ,height} = res;
             fn.call(this, { nativeEvent: { layout: { x: left, y: top, width, height } } })

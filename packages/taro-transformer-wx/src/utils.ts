@@ -131,20 +131,34 @@ export function generateAnonymousState (
     if (blockStatement && blockStatement.isBlockStatement()) {
       blockStatement.traverse({
         VariableDeclarator: (p) => {
-          const { id, init } = p.node
+          let { id, init } = p.node
+
           if (t.isIdentifier(id)) {
-            const newId = scope.generateDeclaredUidIdentifier('$' + id.name)
-            refIds.forEach((refId) => {
-              if (refId.name === variableName && !variableName.startsWith('_$')) {
-                refIds.delete(refId)
-              }
-            })
-            variableName = newId.name
-            refIds.add(t.identifier(variableName))
-            blockStatement.scope.rename(id.name, newId.name)
-            p.parentPath.replaceWith(
-              template('ID = INIT;')({ ID: newId, INIT: init })
-            )
+            if (blockStatement.scope.hasBinding(id.name)//该变量就在这个block中
+            || blockStatement.getFunctionParent() === p.getFunctionParent() //该变量和这个block同方法
+            ) {
+              const newId = scope.generateDeclaredUidIdentifier('$' + id.name)
+              refIds.forEach((refId) => {
+                if (refId.name === variableName && !variableName.startsWith('_$')) {
+                  refIds.delete(refId)
+                }
+              })
+              variableName = newId.name
+              refIds.add(t.identifier(variableName))
+              blockStatement.scope.rename(id.name, newId.name)
+              p.parentPath.replaceWith(
+                template('ID = INIT;')({ ID: newId, INIT: init })
+              )
+            } else {
+              // const container = p.getStatementParent()
+              // if (container.scope.hasBinding(id.name)) {
+              //   container.scope.rename(id.name, newId.name)
+              // } else {
+              //   console.log('WARN', '','无法重命名一个不在当前作用域下的变量' + id.name)
+
+              // }
+            }
+
           }
         }
       })

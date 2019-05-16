@@ -26,6 +26,9 @@ const conversionMap = {
   , NativeEventEmitter: importReplacement
   , NativeAppEventEmitter: importReplacement
   , ListView : importReplacement
+  , ImageBackground : importReplacement
+  , Image : importReplacement
+  , NetInfo : importReplacement
 
 }
 

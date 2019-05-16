@@ -394,11 +394,11 @@ export class RenderParser {
                 ) {
                   let ary = callee.object
                   if (t.isCallExpression(ary) || isContainFunction(callExpr.get('callee').get('object'))) {
-                    const variableName = `${LOOP_CALLEE}_${this.incrementCalleeId()}`
-                    callExpr.getStatementParent().insertBefore(
-                      buildConstVariableDeclaration(variableName, ary)
-                    )
-                    ary = t.identifier(variableName)
+                    // const variableName = `${LOOP_CALLEE}_${this.incrementCalleeId()}`
+                    // callExpr.getStatementParent().insertBefore(
+                    //   buildConstVariableDeclaration(variableName, ary)
+                    // )
+                    // ary = t.identifier(variableName)
                   }
                   if (t.isMemberExpression(ary)) {
                     const id = findFirstIdentifierFromMemberExpression(ary)

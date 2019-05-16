@@ -114,21 +114,23 @@ function doUpdate (component, prevProps, prevState) {
   if (component.__mapped_listSource__ && component.___listSource__) {
     const opreations = component.___listSource__.reduce((sum, config) => {
       const {name, mapto} = config
-      const originDs = dataDiff[name]
-      const mappedDs = dataDiff[mapto]
-      if (originDs && component.$scope.data[name]) {
-        const lastIndex = component.$scope.data[name].length
-        if (mappedDs.length > lastIndex) {
-          for (let start = lastIndex; start < mappedDs.length; start++) {
-            sum.add(`${mapto}[${start}]`, mappedDs[start])
+      if (mapto) {
+        const originDs = dataDiff[name]
+        const mappedDs = dataDiff[mapto]
+        if (originDs && component.$scope.data[name]) {
+          const lastIndex = component.$scope.data[name].length
+          if (mappedDs.length > lastIndex) {
+            for (let start = lastIndex; start < mappedDs.length; start++) {
+              sum.add(`${mapto}[${start}]`, mappedDs[start])
+            }
+            delete dataDiff[mapto]
+          } else {
+            console.log('')
           }
-          delete dataDiff[mapto]
-        } else {
-
+          // 可直接操作 component.$scope.data.xx =value 这里的数据只是用于转化成loopArray中数据，不影响UI
+          component.$scope.data[name] = originDs
+          delete dataDiff[name]
         }
-        // 可直接操作 component.$scope.data.xx =value 这里的数据只是用于转化成loopArray中数据，不影响UI
-        component.$scope.data[name] = originDs
-        delete dataDiff[name]
       }
 
       return sum
@@ -225,9 +227,9 @@ function initListSourceProp (component, data) {
         })
         if (theMappedLoopKey) {
           config.mapto = theMappedLoopKey
+          component.__mapped_listSource__ = true
         }
       }
     })
-    component.__mapped_listSource__ = true
   }
 }

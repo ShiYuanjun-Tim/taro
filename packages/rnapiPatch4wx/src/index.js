@@ -5,10 +5,12 @@ import PixelRatio from './api/PixelRatio'
 import Platform from './api/Platform'
 import StyleSheet from './api/StyleSheet'
 import NativeEventEmitter from './api/NativeEventEmitter'
+import NetInfo from './api/NetInfo'
 import ListView from './api/ListView'
 
 const NativeAppEventEmitter = new NativeEventEmitter()
-
+const ImageBackground = null
+const Image = null
 export {
   DeviceInfo,
   Dimensions,
@@ -17,7 +19,9 @@ export {
   StyleSheet,
   NativeEventEmitter,
   NativeAppEventEmitter,
+  NetInfo,
 
+  ImageBackground, Image,
   ListView
 }
 
@@ -29,7 +33,10 @@ const ReactNative = {
   StyleSheet,
   NativeEventEmitter,
   NativeAppEventEmitter,
+  NetInfo,
 
+  ImageBackground,
+  Image,
   ListView
 }
 

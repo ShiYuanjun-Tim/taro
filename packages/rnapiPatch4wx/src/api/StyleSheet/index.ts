@@ -1,4 +1,4 @@
-import invariant from '../../invariant'
+// import invariant from '../../invariant'
 
 const StyleSheet = {
  
@@ -18,7 +18,11 @@ const StyleSheet = {
     // });
     return styles;
   },
-  flatten: function(){invariant(0,'not implemented yet')},
+  flatten: function(styArr){ 
+    return styArr.reduce(function(sum,sty){
+      return Object.assign(sum , sty)
+    },{})
+  },
   hairlineWidth: 1
 };
 

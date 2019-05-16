@@ -479,10 +479,14 @@ export default function transform (options: Options): TransformResult {
       }
       if (!t.isBinaryExpression(expr, { operator: '+' }) && !t.isLiteral(expr) && name.name === 'style' && !isConverted) {
         const jsxID = path.findParent(p => p.isJSXOpeningElement()).get('name')
-        if (jsxID && jsxID.isJSXIdentifier() && DEFAULT_Component_SET.has(jsxID.node.name)) {
-          exprPath.replaceWith(
-            t.callExpression(t.identifier(INTERNAL_INLINE_STYLE), [expr])
-          )
+        if (jsxID && jsxID.isJSXIdentifier() /* && DEFAULT_Component_SET.has(jsxID.node.name) */) {
+          if (!exprPath.isCallExpression() || ! exprPath.get('callee').isIdentifier({ name: INTERNAL_INLINE_STYLE })) {
+            exprPath.replaceWith(
+              // 防止多次包装INTERNAL_INLINE_STYLE方法
+              t.callExpression(t.identifier(INTERNAL_INLINE_STYLE), [expr])
+              // t.arrayExpression([expr])
+            )
+          }
         }
       }
 

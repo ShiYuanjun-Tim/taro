@@ -49,7 +49,7 @@ export class Ejector {
     })
     this.methodMap.forEach(function(value, key) {
       const { path , statistic } = value
-      if (key !== 'render' && key !== 'constructor' && statistic.onlyReturnUI && path) {
+      if (key !== 'render' && key !== 'constructor' && statistic.jsxCount && path) {
         path.remove()
       }
     })
@@ -67,7 +67,7 @@ export class Ejector {
       return this.methodMap.get(methodName)
     }
     const clazElemsPath = this.root.get('body')
-    const methodsArr = clazElemsPath.map((clzProPath) => {
+    const methodsArr = (clazElemsPath as any).map((clzProPath) => {
       if (clzProPath.isClassMethod()) {
         return [clzProPath.node.key.name, { path: clzProPath, statistic: methodStatistic(clzProPath) }]
       } else if (clzProPath.isClassProperty() && (
@@ -94,15 +94,23 @@ export class Ejector {
         if (
           callee.isMemberExpression()
           && callee.get('object').isThisExpression()
+          && !callee.get('property').isIdentifier({name: 'setState'})
         ) {
           const methodName = (callee.get('property').node as t.Identifier).name
-          const { path: methodPath , statistic } = this.findMethodByName(methodName)
-
-          if (methodPath && statistic.isUIFragMethod()) {
-            this.uIFragMethodSet2Delete.add(methodPath)
-            // 需要深度优先遍历到最内的方法处理完后在一次处理上层调用
-            this.nestCallExplorer(methodPath)
-            this.ejectMethod(path, methodPath.isClassMethod() ? methodPath : methodPath.get('value'))
+          const metdPath = this.findMethodByName(methodName)
+          try {
+            if (metdPath) { //只处理该class的自定义方法
+              const { path: methodPath, statistic } = metdPath
+              if (methodPath && statistic.isUIFragMethod()) {
+                this.uIFragMethodSet2Delete.add(methodPath)
+                // 需要深度优先遍历到最内的方法处理完后在一次处理上层调用
+                this.nestCallExplorer(methodPath)
+                this.ejectMethod(path, methodPath.isClassMethod() ? methodPath : methodPath.get('value'))
+              }
+            }
+          } catch (e) {
+            debugger
+            throw e;
           }
         }
       }
@@ -244,7 +252,7 @@ export class Ejector {
 
   _renameIdentifier (idPath: NodePath<t.Identifier>, scope: Scope): string {
     const oldparamName = idPath.node.name
-    const newParamName = `${oldparamName}${scope.generateUid()}`
+    const newParamName = `${oldparamName}${scope.generateUid().replace('temp','t')}`
     // idPath.scope.rename(oldparamName, newParamName)
     const funcParent = idPath.getFunctionParent()
     try {
@@ -302,7 +310,7 @@ export function methodStatistic (methodPath) {
 
   return {
     isUIFragMethod() {
-      return this.onlyReturnUI && this.returnClauseCount === 1 && this.jsxCount !== 0
+      return this.onlyReturnUI /* && this.returnClauseCount === 1  */&& this.jsxCount !== 0
     },
     onlyReturnUI, returnClauseCount, jsxCount
   }
@@ -369,7 +377,7 @@ function predictSomeIdentifierType (identifierPath: NodePath<t.Identifier>, pred
 
 function isNotJSXCompatible (theReturned: NodePath<t.Node>) {
   const isJSXCompatible = theReturned.isJSXElement()
-    || theReturned.isNullLiteral()
+    || theReturned.isNullLiteral() || theReturned.isConditionalExpression()
     || (theReturned.isCallExpression() && theReturned.get('callee.property').isIdentifier({ name: 'map' })) // return [].map() style
   return !isJSXCompatible
 }

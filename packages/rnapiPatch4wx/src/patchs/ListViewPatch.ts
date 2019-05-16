@@ -23,6 +23,8 @@ export default function listViewTransformer (path: NodePath<t.JSXOpeningElement>
 
   let renderRowAttrPath
   let dataSourceAttrPath
+  let renderHeader
+  let renderFooter
   attrArr.forEach(attrPath => {
     const attrName = attrPath.node.name.name
     switch (attrName) {
@@ -36,6 +38,12 @@ export default function listViewTransformer (path: NodePath<t.JSXOpeningElement>
       case 'dataSource':
         dataSourceAttrPath = attrPath
         break
+      case 'renderHeader': 
+        renderHeader = attrPath
+        break
+      case 'renderFooter': 
+        renderFooter = attrPath
+        break
       // 不转换的属性一起删除
       // default: attrPath.remove()
     }
@@ -47,6 +55,20 @@ export default function listViewTransformer (path: NodePath<t.JSXOpeningElement>
    const name =assertDatasource(dataSourceAttrPath)
 
   recordlistSourceName(path, name)
+
+  if(renderHeader) {
+    (path.parentPath.node as any).children.unshift(
+      t.jSXExpressionContainer(t.callExpression(renderHeader.get('value.expression').node,[]))
+    )
+    renderHeader.remove()
+  }
+
+  if(renderFooter) {
+    (path.parentPath.node as any).children.push(
+      t.jSXExpressionContainer(t.callExpression(renderFooter.get('value.expression').node,[]))
+    )
+    renderFooter.remove()
+  }
 
   renderRowAttrPath.remove()
   dataSourceAttrPath.remove()

@@ -13,6 +13,17 @@ function isObject (val) {
 }
 
 const flexConatinerProps = ['flexDirection', 'justifyContent', 'alignItems']
+function array2obj (arrayable) {
+  if (Array.isArray(arrayable)) {
+    const obj = arrayable.reduce((total, curr) => {
+      const objfy = array2obj(curr)
+      return Object.assign(total, objfy)
+    }, {})
+    return obj
+  }
+  return arrayable
+};
+
 export function inlineStyle (obj) {
   if (obj == null) {
     return ''
@@ -25,12 +36,7 @@ export function inlineStyle (obj) {
     return ''
   }
   // GAI:3 - combine style array
-  let allStyle = obj
-  if (Object.prototype.toString.call(obj) === '[object Array]') {
-    allStyle = obj.reduce((total, curr) => {
-      return Object.assign(total, curr)
-    }, {})
-  }
+  let allStyle = array2obj(obj)
 
   if (!isObject(allStyle)) {
     throw new TypeError('style 只能是一个对象或字符串。')

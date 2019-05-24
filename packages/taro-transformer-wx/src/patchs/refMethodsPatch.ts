@@ -43,7 +43,7 @@ function scrollViewPatch (path: NodePath<t.JSXOpeningElement>) {
   const buildReuqire = template(`const patch = {
     scrollTo : (v) =>{
       const position = typeof v === 'number' ? v : IS_HORIZONTAL ? v.x : v.y;
-      this.setState({KEY: position})
+      this.setState({KEY: position + Math.random()})
     },
     scrollToEnd : (v) =>{
       this.setState({KEY: 100000})

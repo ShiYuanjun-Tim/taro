@@ -1089,22 +1089,22 @@ export class RenderParser {
       }
       const blockStatementPath = component.findParent(p => p.isBlockStatement()) as NodePath<t.BlockStatement>
       const body = blockStatementPath.node.body
-      let loopRefComponent: t.JSXElement
+      let loopRefComponent: t.JSXElement = null as any
       this.loopRefs.forEach((ref, jsx) => {
         if (ref.component.findParent(p => p === component)) {
           loopRefComponent = jsx
         }
       })
-      if (this.loopRefs.has(component.node) || loopRefComponent!) {
+      if (this.loopRefs.has(component.node) || loopRefComponent) {
         hasLoopRef = true
-        const ref = this.loopRefs.get(component.node)! || this.loopRefs.get(loopRefComponent)
+        const ref = this.loopRefs.get(component.node) || this.loopRefs.get(loopRefComponent) || {} as any
         const [ func ] = callee.node.arguments
         let indexId: t.Identifier | null = null
         if (t.isFunctionExpression(func) || t.isArrowFunctionExpression(func)) {
           const params = func.params as t.Identifier[]
           indexId = params[1]
         }
-        if (indexId === null || !t.isIdentifier(indexId!)) {
+        if (indexId === null || !t.isIdentifier(indexId)) {
           throw codeFrameError(component.node, '在循环中使用 ref 必须暴露循环的第二个参数 `index`')
         }
         const id = typeof ref.id === 'string' ? t.binaryExpression('+', t.stringLiteral(ref.id), indexId) : ref.id

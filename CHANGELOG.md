@@ -1,5 +1,42 @@
 <a name=""></a>
 
+### Bug Fixes
+
+* **taro:** inlineStyle 扩展 ([0b4861a](https://github.com/NervJS/taro/commit/0b4861a))
+* **trans:** 删除为用到的ui方法 ([54106ec](https://github.com/NervJS/taro/commit/54106ec))
+* **trans:** 防止微信滚动到0后不在变动 ([33fce37](https://github.com/NervJS/taro/commit/33fce37))
+* **wx:** 修复深度map嵌套时候的变量乱提升问题 ([9a0b4e3](https://github.com/NervJS/taro/commit/9a0b4e3))
+
+
+
+<a name="1.2.2-11"></a>
+## [1.2.2-11](https://github.com/NervJS/taro/compare/v1.2.2-10...v1.2.2-11) (2019-04-15)
+
+
+
+<a name="1.2.2-10"></a>
+## [1.2.2-10](https://github.com/NervJS/taro/compare/v1.2.2-9...v1.2.2-10) (2019-04-15)
+
+
+### Bug Fixes
+
+* **cli:** change taro to tarorn command ([7002a40](https://github.com/NervJS/taro/commit/7002a40))
+
+
+
+<a name="1.2.2-9"></a>
+## [1.2.2-9](https://github.com/NervJS/taro/compare/v1.2.2-8...v1.2.2-9) (2019-04-15)
+
+
+
+<a name="1.2.2-8"></a>
+## [1.2.2-8](https://github.com/NervJS/taro/compare/v1.2.2-7...v1.2.2-8) (2019-04-15)
+
+
+
+<a name="1.2.2-7"></a>
+## [1.2.2-7](https://github.com/NervJS/taro/compare/v1.2.2-6...v1.2.2-7) (2019-04-15)
+
 
 ### Features
 

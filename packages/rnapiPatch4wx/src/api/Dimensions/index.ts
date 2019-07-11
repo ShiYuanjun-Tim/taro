@@ -1,9 +1,8 @@
 declare const wx: any;
 import * as debounce from 'debounce'
 import invariant from '../../invariant'
-import deviceInfo from '../DeviceInfo'
-import compareVersion from '../../compareVersion'
-
+ import compareVersion from '../../compareVersion'
+import deviceInfo from "../DeviceInfo"
 interface Dimesion {
   height: number;
   width: number;
@@ -11,28 +10,27 @@ interface Dimesion {
   fontScale: number;
 }
 
-const dimensions = {
-  window: {
-    height: deviceInfo.windowHeight,
-    width: deviceInfo.windowWidth,
-    scale: deviceInfo.pixelRatio,
-    fontScale: 1//deviceInfo.fontSizeSetting
-  },
-  screen: {
-    height: deviceInfo.screenHeight,
-    width: deviceInfo.screenWidth,
-    scale: deviceInfo.pixelRatio,
-    fontScale: 1
-  },
-};
-
 
 const listeners = {};
 
 export default class Dimensions {
   static get(dimension: string): Dimesion {
-    invariant(dimensions[dimension], `No dimension set for key ${dimension}`);
-    return dimensions[dimension];
+    // invariant(dimensions[dimension], `No dimension set for key ${dimension}`);
+    const deviceInfo = wx.getSystemInfoSync();
+    return  {
+      window: {
+        height: deviceInfo.windowHeight,
+        width: deviceInfo.windowWidth,
+        scale: deviceInfo.pixelRatio,
+        fontScale: 1//deviceInfo.fontSizeSetting
+      },
+      screen: {
+        height: deviceInfo.screenHeight,
+        width: deviceInfo.screenWidth,
+        scale: deviceInfo.pixelRatio,
+        fontScale: 1
+      },
+    }[dimension];
   }
 
   static set(): void {
@@ -40,18 +38,9 @@ export default class Dimensions {
 
   }
 
-  static _update({ windowWidth, windowHeight }) {
+  static _update() {
 
-    dimensions.window = {
-      fontScale: 1,
-      height: windowHeight,
-      scale: dimensions.window.scale,
-      width: windowWidth
-    };
-
-    if (Array.isArray(listeners['change'])) {
-      listeners['change'].forEach(handler => handler(dimensions));
-    }
+    
   }
 
   static addEventListener(type: string, handler: Function): void {

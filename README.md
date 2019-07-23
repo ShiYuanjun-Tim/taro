@@ -1,147 +1,231 @@
-# Taro
+ 
+Tarorn 基于[taro](https://github.com/NervJS/taro)的 ReactNative转化微信的项目
 
-[![](https://img.shields.io/node/v/@tarojsrn/cli.svg?style=flat-square)](https://www.npmjs.com/package/@tarojsrn/cli)
-[![](https://img.shields.io/npm/v/@tarojsrn/taro.svg?style=flat-square)](https://www.npmjs.com/package/@tarojsrn/taro)
-[![](https://img.shields.io/npm/l/@tarojsrn/taro.svg?style=flat-square)](https://www.npmjs.com/package/@tarojsrn/taro)
-[![](https://img.shields.io/npm/dt/@tarojsrn/taro.svg?style=flat-square)](https://www.npmjs.com/package/@tarojsrn/taro)
-[![](https://img.shields.io/travis/NervJS/taro.svg?style=flat-square)](https://travis-ci.org/NervJS/taro)
+使用
 
-> 👽 Taro['tɑ:roʊ]，泰罗·奥特曼，宇宙警备队总教官，实力最强的奥特曼。
+1. 安装  `npm i -g @tarojsrn/cli`
+2. [添加微信相关配置](#配置文件)
+3. 运行 `tarorn build --type weapp`
 
-## 简介
+##  项目的本地开发设置
+1. 把本项目clone到本地 (rn2wx)，确认本地node和npm版本
 
-**Taro** 是一套遵循 [React](https://reactjs.org/) 语法规范的 **多端开发** 解决方案。现如今市面上端的形态多种多样，Web、React-Native、微信小程序等各种端大行其道，当业务要求同时在不同的端都要求有所表现的时候，针对不同的端去编写多套代码的成本显然非常高，这时候只编写一套代码就能够适配到多端的能力就显得极为需要。
+> **Prerequest**
 
-使用 **Taro**，我们可以只书写一套代码，再通过 **Taro** 的编译工具，将源代码分别编译出可以在不同端（微信/百度/支付宝小程序、H5、React-Native 等）运行的代码。
+安装依赖时node版本不能太高推荐 >8.0 && <10.0 /  npm5.7 > && <6.0  ，经过测试nodev8.15.0 (npm v5.10.0) 可用
 
-## 学习资源
-
-[awesome-taro](https://github.com/NervJS/awesome-taro)
-
-掘金小册：[Taro 多端开发实现原理与实战](https://juejin.im/book/5b73a131f265da28065fb1cd?referrer=5ba228f16fb9a05d3251492d)
-
-
-## 使用案例
-
-Taro 已经投入了我们的生产环境中使用，业界也在广泛地使用 Taro 开发多端应用。
-
-![案例](https://storage.360buyimg.com/taro-resource/user-cases.jpg)
-
-[征集更多优秀案例](https://github.com/NervJS/taro/issues/244)
-
-## Taro 特性
-
-#### React 语法风格
-
-Taro 的语法规则基于 React 规范，它采用与 React 一致的组件化思想，组件生命周期与 React 保持一致，同时在书写体验上也尽量与 React 类似，支持使用 JSX 语法，让代码具有更丰富的表现力。
-
-代码示例
-
-```javascript
-import Taro, { Component } from '@tarojsrn/taro'
-import { View, Button } from '@tarojsrn/components'
-
-export default class Index extends Component {
-  constructor () {
-    super(...arguments)
-    this.state = {
-      title: '首页',
-      list: [1, 2, 3]
-    }
-  }
-
-  componentWillMount () {}
-
-  componentDidMount () {}
-
-  componentWillUpdate (nextProps, nextState) {}
-
-  componentDidUpdate (prevProps, prevState) {}
-
-  shouldComponentUpdate (nextProps, nextState) {
-    return true
-  }
-
-  add = (e) => {
-    // dosth
-  }
-
-  render () {
-    return (
-      <View className='index'>
-        <View className='title'>{this.state.title}</View>
-        <View className='content'>
-          {this.state.list.map(item => {
-            return (
-              <View className='item'>{item}</View>
-            )
-          })}
-          <Button className='add' onClick={this.add}>添加</Button>
-        </View>
-      </View>
-    )
-  }
-}
+2. 项目本地安装 `npm run bootstrap`
+3. 新建需要转化的rn项目,并添加依赖（dev-dep） （需要把相关本地项目作为依赖使用, 参考npm link）
+```
+babel-preset-env 
+babel-plugin-transform-decorators-legacy
+npm link /Users/syj/WS/rn2wx/packages/taro
+npm link /Users/syj/WS/rn2wx/packages/rnapiPatch4wx
+npm link /Users/syj/WS/rn2wx/packages/taro-weapp
+npm link /Users/syj/WS/rn2wx/packages/taro-plugin-babel
+产线环境额外需要以下2个
+npm link /Users/syj/WS/rn2wx/packages/taro-plugin-uglifyjs
+npm link /Users/syj/WS/rn2wx/packages/taro-plugin-csso
 ```
 
-#### 快速开发微信小程序
+4. 启动本地转化服务  （以下是vscode的参考配置 ） 
+```
+ {
+      "type": "node",
+      "request": "launch",
+      "name": "runRnProj",
+      "program": "${workspaceFolder}/packages/taro-cli/bin/tarorn-build",
+      "cwd": "/Users/syj/WS/expoApp",
+      "args": ["--type","weapp","--watch"]
+    }
+```
 
-Taro 立足于微信小程序开发，众所周知小程序的开发体验并不是非常友好，比如小程序中无法使用 npm 来进行第三方库的管理，无法使用一些比较新的 ES 规范等等，针对小程序端的开发弊端，Taro 具有以下的优秀特性：
+5. 尝试更改代码, 
+   1. ts项目的更改推荐开启tsc -w模式，方便实时响应改动， 比如taro-transformer-wx / rnapiPatch4wx
+   2. 特殊项目的改动需要使用`npm run tarochange` 重新构建整个项目 比如taro 和 taro-weapp 
 
-✅ 支持使用 npm/yarn 安装管理第三方依赖。
 
-✅ 支持使用 ES7/ES8 甚至更加新的 ES 规范，一切都可自行配置。
+#### 配置文件
+1. 根目录下的config文件夹 需要taro的配置，用于配置代码转译行为：
+   - 配置项目编译时候需要替换的常量defineConstants和环境变量env
+   - 定义本地模块别名alias 类似webpack的alias和tsconfig中的paths属性
+   - 需要额外拷贝的文件（拷贝到微信的编译目的目录中）
+2. project.config.json 微信使用的配置定义源码根目录文件夹等
 
-✅ 支持使用 CSS 预编译器，例如 Sass 等。
 
-✅ 支持使用 Redux 进行状态管理。
+####  lib改动
+1 eflow 所有的window.Set/Map 之类的对象需要删除掉window
+2  6.X 版本的  babel-traverse/lib/scope/renamer.rename() line91 方法中
+```javascript
+    var parentDeclar = path.find(function (path) {
+      return path.isDeclaration() || path.isFunctionExpression()||  path.isClassExpression();
+    });
+    if (parentDeclar) {
+      const bindingIds = parentDeclar.getOuterBindingIdentifiers();
 
-✅ 支持使用 Mobx 进行状态管理。
+      if (bindingIds[oldName] === binding.identifier) {
+         this.maybeConvertFromExportDeclaration(parentDeclar);
+      }
+    }
+```
 
-✅ 小程序 API 优化，异步 API Promise 化等等。
+#### 主要改动的项目有
 
-#### 支持多端开发转化
+- packages/eslint-plugin-taro
+- packages/taro
+- packages/taro-cli
+- packages/rnapiPatch4wx  【新】集中存放rn转译译wx用的补丁
+- packages/taro-transformer-wx
+- packages/taro-weapp
 
-Taro 方案的初心就是为了打造一个多端开发的解决方案。目前 Taro 代码可以支持转换到 **微信/百度/支付宝/字节跳动小程序** 、 **H5 端** 以及 **移动端（React-Native）**。
+> ###  **Test Point**
 
-<div align="center"><img src="https://storage.360buyimg.com/taro-resource/platforms.jpg"/></div>
+#### 特性测试
 
-## 贡献者们
+> ##### **语法**
 
-<a href="https://github.com/NervJS/taro/graphs/contributors"><img src="https://opencollective.com/taro/contributors.svg?width=890&button=false" /></a>
+- 含有 JSX 的 switch case 语句必须每种情况都用花括号 `{}` 包裹结果
+- 同一个作用域的JSX 变量延时赋值没有意义。详见：https://github.com/NervJS/taro/issues/550
+- 不行使用 for 循环操作 JSX 元素，详情：https://github.com/NervJS/taro/blob/master/packages/eslint-plugin-taro/docs/manipulate-jsx-as-array.md')
+- 同一个库不可以被 import超过一次 
+- StyleSheet 不要重命名/ 使用StyleSheet创建样式，请保持StyleSheet.create格式
+- flex布局的容器需要添加flexContainer属性标明方便转码打补丁
 
-## 开发计划
+> ##### **样式**
 
-[开发计划](./PLANS.md)
+1. 格式  - rn样式写法为主去兼容到wx
+  -  inline style
+  -  style array
+  -  StyleSheet object
+  -  **不打算支持 css 文件的导入**  
 
-## 更新日志
+| status |  方面   | rn   | wx   |
+|:-------|:---------|:-----|:-----|
+| Pending |  flex layout|default flex-direction:column|default flex-direction:row,需要显示添加display:flex 启用flex布局|
+| Done | 单位 | 默认不需要单位默认dp|需要补充单位/换算  目前使用了px没做换算|
+| Done | StyleSheet 支持| support |  support |
+| Pending | flex布局 容器大小 | 不设置大小就找在上层 |  不超出直接容器 |
+| Pending | flex:1 | 占满容器 |  无用不会自动占满 需要大小 |
 
-本项目遵从 [Angular Style Commit Message Conventions](https://gist.github.com/stephenparish/9941e89d80e2bc58a153)，更新日志由 `conventional-changelog` 自动生成。完整日志请点击 [CHANGELOG.md](./CHANGELOG.md)。
+> #####  **组件**
 
-## 开发交流
+1. 属性传递
+    - 方法/回调
+      -  事件方法绑定的必须是`arrow function`的形式定义的class的方法，否则this指向错误
+      -  事件通过 wx的 customeEvent的形式触发的，所以父组件传递下去的方法事实上是不会有任何返回的，所以**不可以通过传递方法给子组件使用来使得自组件获取父组件中定义的任何内容，eg. ListView的renderRow的这种用法**
+      -  事件handler命名必须 `on`开头
+    - 组件
+      -  不支持 替代方案是使用*组合组件 5*方式,
+    - 数据 Ok
+    - 命名问题
+      -  `on`开头的方法有特殊待遇，这个属性名被被当作事件触发
+    - **配置为页面的组件其参数无法通过标签上的属性来传递 只能url或者数据管理类**
+    - >  疑难排查
+      - 为什么无法属性传递下去 组件中拿不到
+        1. 属性名字是否是on开头了 类似 onestr 之类的
+        2. 改组件是不是事实上是一个页面（配置在App的config.pages中）
 
-[官方交流微信群](https://github.com/NervJS/taro/issues/198)
 
-## License
 
-MIT License
+2. children的使用
+    - **请不要对 this.props.children 进行任何操作**
+      this.props.children[0] 在 Taro 中都是非法的
 
-Copyright (c) 2018 O2Team
+    - **不要把 this.props.children 分解为变量再使用**
+      你必须显性地把 this.props.children 全部都写完整才能实现它的功能, 不要先xx=this.props 之后用{xx.children}的形式使用
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+3. `不支持` 纯函数当做组件, 替代：可以使用一般组件写法定义
+    
+4. 组件的组合
+    组件的组合需要遵守 this.props.children 的所有规则。组合这个功能和 this.props.children 一样是通过 slot 实现的，也就是说 this.props.children 的限制对于组件组合也都同样适用。
+    所有组合都必须用 `render` 开头，且遵守驼峰式命名法。和我们的事件规范以 on 开头一样，组件组合使用 `render` 开头。
+    组合只能传入单个 JSX 元素，不能传入其它任何类型。当你需要进行一些条件判断或复杂逻辑操作的时候，可以使用一个 Block 元素包裹住，然后在 Block 元素的里面填充其它复杂的逻辑。
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+5. Rn中的组件和wx组件差异  
+  有3中方式来实现
+  1. 如果rn没有但是wx有 ：推荐 用RN实现wx组件接口 - 以wxapi为主 （button）
+  2. 如果rn有 wx没有 ： 需要提供patch保证wx端的不报错/ 或者编译成wx组件（Touchable*）
+  3. rn有wx也有但是接口不一样 ： 可以用方法1 以一端接口为主/ 或者用编译方式更改源码
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+> #####  **路由/页面跳转**
+
+> #####  **事件**
+  事件属性必须on**模式 
+> #####  **平台判断**
+
+  1. process.env.TARO_ENV=="weapp"
+    编译时判断 ，这种方式在babel编译过程中微信端代码会被pick出来而其他非微信平台代码会被删除
+  2. Platform=="weapp"
+    代码会保留在源文件代码中，运行时判断
+  3. 平台后缀   xxx.wx.js
+    编译过程自动选择平台文件，非平台文件不会被加载打包
+  4. 直接编写微信小程序代码，在用一层rn代码做简单包装即可
+> #####  **其他兼容wx的点**
+
+1. 微信头bar的配置  =》 this.config
+
+
+> ##### 源码改动点 modification
+
+- style 
+1.  GAI:1  将react中的Component改成 @tarojs/taro-weapp中的Component
+2.  GAI:2  将react-native的引用删除防止拷贝这些东西到项目中(之后考虑替换自定义库)
+3.  GAI:3   style支持RN中array的写法
+               添加单位目前是px单位可修改
+4. GAI:13 提供全局样式的入口
+ 
+- componet
+1. GAI:5  检测所有事件方法（onPress, onScroll等） ，转化成wx相应的事件方法 （bindtap， bindScroll）
+2. GAI:6 import的rn组件中一部分需要替换掉比如Touchable.* 全部用view替换, 并且修改onPresss到bindtap
+3. GAI:7 图片转换把source转化为src, 转化如下格式
+    - {{uri:"xxx}}
+    - {obj}
+    - {obj.xxx}
+    - {require(xxxx)}   本地图片base64编码
+4. GAI:8 图片的resizemode转换
+5. GAI:9 scrollView的RN到微信转化
+6. GAI:10 flex容器添加flexContainer属性， 用于补充wx平台的样式， 该属性会使得样式前面插入样式补丁： { flexDirection: 'column', display: 'flex' }    ,  默认如果样式中出现容器类属性 flexConatinerProps= ['flexDirection', 'justifyContent' , 'alignItems'] 则自动给属性中插入 display: 'flex'
+7. GAI:11 scrollview的method scrollTo/scrollToEnd方法的转码实现 ，通过ref的方法注入实现
+8. GAI:12 新增模块rnapiPatch4wx 主要提供RN组件在wx端的mock实现，并且在导入组件时的替换
+9. GAI:13  嵌套解析npm依赖时指定不需要解析的路径/不可能用到 ，【理想情况该把导入都remove掉】
+ ```
+     ignoredRequire:[ //regexp 数组，用来去除require时候不必要的导入,利用全路径匹配以下的路径，match则删除require
+        '@yqb/rnframework/lib/token/cashier',
+        process.cwd() + '/config/locale',
+        // axios库中wx端名确不会有如下代码的使用
+        'node_modules/axios/lib/adapters',
+        /\.(web|ios|android)\.?/    
+      ]
+```
+10. GAI:14 文件解析后后缀, 本地文件也是优先使用带平台的代码: 比如require('./a') 会尝试a.wx.js a.js,不解析 平台文件ios android web
+    packages/taro-cli/src/util/index.js 配置文件后缀 use in resolveScriptPath
+    exports.JS_EXT = ['.js', '.jsx']
+    exports.TS_EXT = ['.ts', '.tsx']
+11. GAI:15 eflow wrap的替换
+12. GAI:16 jsx方法的支持  采用eject方式/不采用template方式
+13. GAI:17 ListView相关改动  新增属性 __wxBatchCount 用于根据实际数据大小需求 合理调整单次setData的列表数据条数防止超出1m
+14. GAI:18 提供onLayout回调支持 用于获取组件的绘制完成后的大小定位 
+    -  出现onLayout的组件上ref属性不能使用string来做，必须是回调或者可以没有
+    -  onLayout 只会在didMount时候调用一次，并不会重复触发
+
+
+> ##### RN代码兼容写法
+
+- **flex 布局容器 需要添加flexContainer 属性标志，方便编译代码打补丁**
+- **flex布局时候 flex方向所在的大小必须设置 如果是row方向则容器需要width（默认100%） 如果方向是column则容器需要height**
+- **只有flex容器（wx需要用flexContainer标记）中的flex属性才能如预期效果，flex容器外的独立flex使用可能在rn可行wx不可行**
+- 含有绝对定位元素的的容器本身必须是非static（默认）定位
+- 不要使用window这个东西
+- 组件属性传递无法使用对象结构写法  类似 <Comp {...someObj}/> 可用 <Comp newprop={someObj}/>
+- render尽量不要有多出口 最好先把null提前处理不要把返回的逻辑包在条件中
+- RN导入的模块不要用as改名
+- 构造函数中不要写 动态初始化的state的逻辑，只写静态的无副作用的（多次执行状态一致的）state初始化逻辑
+- render中避免不必要的重新赋值 能直接用this.state/props.xxx 为最优,尤其是列表的数据源属性
+- 列表页添加配置 __wxBatchCount控制长列表单词更新数据量 默认100, 
+    - 保证数据连续性，重置操作的数据量不应比现有数据更多，不然会认为是一次增量更新 (留待需要在做)
+    - 增量更新默认是认为只需要添加多处的那部分，之前长度的部分默认认为是一样的
+    - 不要2次setState({dataSource})的数据一样长，这样会导致逐条比较获取 diffdata性能很差
+- 不要使用WX端原生组件的名字比如Icon之类的， 并且对于导入的UI模块不要去用as来重命名
+- 不要在构造函数中做有副作用的操作比如异步操作等, 如果需要根据父级传下的prop数据来做请求，请把代码写在DidMount阶段（只有这里才能争取获取数据，**如果父亲节点是个page则一定要如此**）
+- [].map(()=>{})中 return 不要用if else分支   可用 ？：s
+-  `不支持` 纯函数当做组件, 替代：可以使用一般组件写法定义
